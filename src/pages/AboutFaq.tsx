@@ -262,7 +262,7 @@ export function AboutFaq({ defaultTab = 'about' }: Props) {
                   </h3>
                 </div>
                 <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--ghost)', lineHeight: 1.65 }}>
-                  Showcase collective faction armories, contract bespoke Ranked War propaganda banners, defend your vault against underworld heists, and underwrite with Lloyd's of Torn insurance.
+                  Contract bespoke Ranked War propaganda banners, order coordinated member forum suites, and commission high-impact territory graphics with milestone escrow protections.
                 </p>
               </div>
             </div>

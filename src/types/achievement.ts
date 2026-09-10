@@ -4,8 +4,6 @@
    ================================================================ */
 
 export type AchievementCategory =
-  | 'HEIST_OPERATIVE'
-  | 'VAULT_FORTRESS'
   | 'BLACK_MARKET'
   | 'SYNDICATE_PATRON'
   | 'MARKET_TYCOON';

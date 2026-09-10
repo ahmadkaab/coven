@@ -235,16 +235,14 @@ export function CollectorProfile() {
                 </h2>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flexShrink: 0 }}>
-                <Link
-                  to="/heist"
+                <span
                   className="badge badge-edition"
-                  style={{ textDecoration: 'none', color: 'var(--term-green)', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
-                  title="Manage Vault Security Defenses & Lloyd's Insurance"
+                  style={{ color: 'var(--term-green)', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
                 >
-                  <ShieldCheck size={12} weight="bold" /> VAULT SEC: LVL 3 (68%)
-                </Link>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--term-green)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  ● 100% LLOYD'S INSURED
+                  <ShieldCheck size={12} weight="bold" /> COVEN VERIFIED VAULT
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--ghost)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  ● CERTIFIED DELIVERABLES
                 </span>
               </div>
             </div>

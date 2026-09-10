@@ -324,11 +324,11 @@ export function AchievementsHub() {
           </div>
 
           <Link
-            to="/heist"
+            to="/trade"
             className="btn btn-ghost btn-sm"
             style={{ fontSize: '0.625rem', gap: '4px' }}
           >
-            <Crosshair size={12} weight="bold" /> HEIST OPS →
+            <ArrowsLeftRight size={12} weight="bold" /> ESCROW TRADES →
           </Link>
         </div>
 
@@ -356,24 +356,6 @@ export function AchievementsHub() {
                   ⚡ REWARDS READY ({unclaimedCount})
                 </button>
               )}
-
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('HEIST_OPERATIVE')}
-                className={`btn btn-sm ${selectedCategory === 'HEIST_OPERATIVE' ? 'btn-primary' : 'btn-ghost'}`}
-                style={{ fontSize: '0.625rem' }}
-              >
-                HEIST OPERATIVE
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('VAULT_FORTRESS')}
-                className={`btn btn-sm ${selectedCategory === 'VAULT_FORTRESS' ? 'btn-primary' : 'btn-ghost'}`}
-                style={{ fontSize: '0.625rem' }}
-              >
-                VAULT DEFENSE & LLOYD'S
-              </button>
 
               <button
                 type="button"

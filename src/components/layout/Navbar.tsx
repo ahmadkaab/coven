@@ -150,7 +150,6 @@ export function Navbar() {
     { href: '/auctions', label: 'Auctions' },
     { href: '/commissions', label: 'Commissions' },
     { href: '/trade', label: 'Trade' },
-    { href: '/heist', label: 'Heists' },
     { href: '/achievements', label: 'Accolades' },
     { href: '/market-pulse', label: 'Pulse', live: true },
     { href: '/userscript', label: 'Script', badge: 'EXT' },

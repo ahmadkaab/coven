@@ -16,7 +16,6 @@ import { Notifications }    from './pages/Notifications';
 import { Dispatches }       from './pages/Dispatches';
 import { CollectorProfile } from './pages/CollectorProfile';
 import { TradeDesk }        from './pages/TradeDesk';
-import { HeistOperations }   from './pages/HeistOperations';
 import { AchievementsHub }   from './pages/AchievementsHub';
 import { UserScriptInstall } from './pages/UserScriptInstall';
 import { PrivacyTerms }      from './pages/PrivacyTerms';
@@ -47,8 +46,6 @@ export default function App() {
         <Route path="/trade"          element={<TradeDesk />} />
         <Route path="/trade/:id"      element={<TradeDesk />} />
         <Route path="/trade/new"      element={<TradeDesk />} />
-        <Route path="/heist"          element={<HeistOperations />} />
-        <Route path="/security"       element={<HeistOperations />} />
         <Route path="/achievements"   element={<AchievementsHub />} />
         <Route path="/accolades"      element={<AchievementsHub />} />
         <Route path="/userscript"     element={<UserScriptInstall />} />
