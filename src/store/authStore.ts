@@ -1,0 +1,124 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { fetchTornProfile, upsertUser, getArtistByTornId } from '../services/authService';
+import type { TornUser } from '../types';
+import { DEMO_PERSONAS, type DemoPersona } from '../config/demoPersonas';
+
+interface AuthState {
+  /* State */
+  user:        TornUser | null;
+  apiKey:      string | null;
+  userId:      string | null;
+  artistId:    string | null;
+  isArtist:    boolean;
+  loading:     boolean;
+  error:       string | null;
+
+  /* Actions */
+  signIn:             (apiKey: string, tornId?: string) => Promise<boolean>;
+  loginAsDemoPersona: (persona: DemoPersona) => void;
+  logout:             () => void;
+  setArtist:          (artistId: string) => void;   // called after registration
+
+  /* Internal */
+  setLoading:  (v: boolean) => void;
+  setError:    (v: string | null) => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user:     null,
+      apiKey:   null,
+      userId:   null,
+      artistId: null,
+      isArtist: false,
+      loading:  false,
+      error:    null,
+
+      setLoading: (loading)  => set({ loading }),
+      setError:   (error)    => set({ error, loading: false }),
+
+      signIn: async (apiKey: string) => {
+        set({ loading: true, error: null });
+        try {
+          const trimmedKey = apiKey.trim();
+          if (!trimmedKey) throw new Error('Please enter your Torn API key.');
+
+          // 1. Check if it matches a demo persona key for quick testing
+          const demoMatch = DEMO_PERSONAS.find(
+            (p: DemoPersona) => p.apiKey.toLowerCase() === trimmedKey.toLowerCase()
+          );
+          if (demoMatch) {
+            set({
+              user:     demoMatch.user,
+              apiKey:   demoMatch.apiKey,
+              userId:   demoMatch.userId,
+              artistId: demoMatch.artistId,
+              isArtist: demoMatch.isArtist,
+              loading:  false,
+              error:    null,
+            });
+            return true;
+          }
+
+          // 2. Query Torn API directly — automatically resolves player_id, name, rank, level, faction, etc.
+          const profile = await fetchTornProfile(trimmedKey);
+
+          // 3. Upsert into Supabase — get internal UUID + artist flag
+          const { id: userId, is_artist } = await upsertUser(profile);
+
+          // 4. Check for artist profile
+          const artistId = is_artist
+            ? await getArtistByTornId(String(profile.player_id))
+            : null;
+
+          set({
+            user:     profile,
+            apiKey:   trimmedKey,
+            userId,
+            artistId,
+            isArtist: is_artist,
+            loading:  false,
+            error:    null,
+          });
+          return true;
+        } catch (err: any) {
+          set({ loading: false, error: err.message ?? 'Login failed — could not authenticate API key' });
+          return false;
+        }
+      },
+
+      loginAsDemoPersona: (persona: DemoPersona) => {
+        set({
+          user:     persona.user,
+          apiKey:   persona.apiKey,
+          userId:   persona.userId,
+          artistId: persona.artistId,
+          isArtist: persona.isArtist,
+          loading:  false,
+          error:    null,
+        });
+      },
+
+      logout: () =>
+        set({
+          user: null, apiKey: null, userId: null,
+          artistId: null, isArtist: false, error: null,
+        }),
+
+      setArtist: (artistId: string) =>
+        set({ artistId, isArtist: true }),
+    }),
+    {
+      name: 'coven-auth',
+      partialize: (s) => ({
+        user:     s.user,
+        apiKey:   s.apiKey,
+        userId:   s.userId,
+        artistId: s.artistId,
+        isArtist: s.isArtist,
+      }),
+    }
+  )
+);
