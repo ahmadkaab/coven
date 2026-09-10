@@ -1,4 +1,4 @@
-﻿/* ================================================================
+/* ================================================================
    COVEN — Syndicate Radar & Collector Service
    localStorage-backed artist following and collector dossiers.
    ================================================================ */
@@ -82,8 +82,10 @@ export function getFollowerCount(artistId: string, currentUserId?: string): numb
   return isSelf ? base + 1 : base;
 }
 
-/* ── COLLECTOR PROFILES ────────────────────────────────────── */
-export function getCollectorProfile(userId: string): CollectorProfile {
+export function getCollectorProfile(
+  userId: string,
+  currentUser?: { player_id: number; name: string; rank?: string; level?: number; profile_image?: string } | null
+): CollectorProfile {
   const badges: CollectorBadge[] = [
     {
       id: 'whale_patron',
@@ -127,12 +129,19 @@ export function getCollectorProfile(userId: string): CollectorProfile {
     },
   ];
 
+  const isSelf = currentUser && (String(currentUser.player_id) === userId || userId === 'demo' || !userId);
+  const resolvedId = isSelf && currentUser ? String(currentUser.player_id) : (userId === 'demo' || !userId ? '4295891' : userId);
+  const username = isSelf && currentUser ? currentUser.name : (resolvedId === '4295891' ? 'ahmad_kaab' : `Operative_${resolvedId}`);
+  const avatar = isSelf && currentUser?.profile_image ? currentUser.profile_image : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
+  const rank = isSelf && currentUser?.rank ? currentUser.rank : 'Syndicate Operative';
+  const level = isSelf && currentUser?.level ? currentUser.level : 65;
+
   return {
-    player_id: userId === 'demo' ? '4295891' : userId,
-    username: 'ahmad_kaab',
-    avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
-    rank: 'Syndicate Overlord',
-    level: 78,
+    player_id: resolvedId,
+    username,
+    avatar_url: avatar,
+    rank,
+    level,
     faction: {
       id: 9410,
       name: 'Monarch Syndicate',

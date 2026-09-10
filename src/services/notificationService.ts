@@ -53,7 +53,7 @@ function writeStore(userId: string, notifications: Notification[]): void {
 export function getNotifications(userId: string): Notification[] {
   let notifs = readStore(userId);
   if (notifs.length === 0) {
-    notifs = generateDemoNotifications(userId);
+    notifs = getInitialNotifications(userId);
     writeStore(userId, notifs);
   }
   return notifs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -111,99 +111,19 @@ function dispatchUpdate(): void {
   window.dispatchEvent(new CustomEvent('coven:notification'));
 }
 
-/* ── DEMO DATA ─────────────────────────────────────────────── */
-const ARTISTS = ['DarkViper', 'xShadow', 'NeonKat', 'PixelWitch', 'Crimson_FX', 'GlitchArtist'];
-const ARTWORKS = [
-  'Neon Reaper', 'Crimson Tide', 'Shadow Protocol', 'Digital Vortex',
-  'Pixel Warfare', 'Void Eclipse', 'Chrome Skull', 'Faction Fury',
-  'Night Ops Banner', 'Toxic Haze', 'Neural Link', 'Cyber Samurai',
-];
-
-function rnd<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function hoursAgo(h: number): string {
-  return new Date(Date.now() - h * 3600_000).toISOString();
-}
-
-function generateDemoNotifications(userId: string): Notification[] {
+/* ── INITIAL NOTIFICATIONS ───────────────────────────────── */
+function getInitialNotifications(userId: string): Notification[] {
   void userId;
-  const notifs: Notification[] = [
-    // Bids
+  return [
     {
-      id: uid(), type: 'bid_received', category: 'bids',
-      title: 'New Bid Received',
-      message: `${rnd(ARTISTS)} placed a $${(15000 + Math.floor(Math.random() * 50000)).toLocaleString()} bid on "${rnd(ARTWORKS)}"`,
-      link: '/artwork/a1', read: false, timestamp: hoursAgo(0.2),
-    },
-    {
-      id: uid(), type: 'bid_received', category: 'bids',
-      title: 'New Bid Received',
-      message: `${rnd(ARTISTS)} placed a $${(8000 + Math.floor(Math.random() * 30000)).toLocaleString()} bid on "${rnd(ARTWORKS)}"`,
-      link: '/artwork/a2', read: false, timestamp: hoursAgo(1.5),
-    },
-    {
-      id: uid(), type: 'bid_outbid', category: 'bids',
-      title: 'You Were Outbid',
-      message: `Someone outbid you on "${rnd(ARTWORKS)}". Current bid: $${(20000 + Math.floor(Math.random() * 40000)).toLocaleString()}`,
-      link: '/artwork/a3', read: false, timestamp: hoursAgo(3),
-    },
-    {
-      id: uid(), type: 'auction_ending', category: 'bids',
-      title: 'Auction Ending Soon',
-      message: `Your auction for "${rnd(ARTWORKS)}" ends in 2 hours`,
-      link: '/artwork/a4', read: true, timestamp: hoursAgo(5),
-    },
-    {
-      id: uid(), type: 'auction_won', category: 'bids',
-      title: 'Auction Won!',
-      message: `Congratulations! You won "${rnd(ARTWORKS)}" for $${(25000 + Math.floor(Math.random() * 75000)).toLocaleString()}`,
-      link: '/artwork/a5', read: true, timestamp: hoursAgo(18),
-    },
-    // Sales
-    {
-      id: uid(), type: 'sale_completed', category: 'sales',
-      title: 'Sale Completed',
-      message: `"${rnd(ARTWORKS)}" sold to ${rnd(ARTISTS)} for $${(10000 + Math.floor(Math.random() * 60000)).toLocaleString()}`,
-      link: '/dashboard', read: false, timestamp: hoursAgo(2),
-    },
-    {
-      id: uid(), type: 'price_alert', category: 'sales',
-      title: 'Price Alert',
-      message: `"${rnd(ARTWORKS)}" on your watchlist dropped below your target price`,
-      link: '/browse', read: true, timestamp: hoursAgo(12),
-    },
-    // Commissions
-    {
-      id: uid(), type: 'commission_request', category: 'commissions',
-      title: 'New Commission Request',
-      message: `${rnd(ARTISTS)} requested a custom faction banner commission — Budget: $${(20000 + Math.floor(Math.random() * 30000)).toLocaleString()}`,
-      link: '/commissions', read: false, timestamp: hoursAgo(4),
-    },
-    {
-      id: uid(), type: 'commission_update', category: 'commissions',
-      title: 'Commission Update',
-      message: `Your commission with ${rnd(ARTISTS)} has been marked as "Delivered"`,
-      link: '/commissions', read: true, timestamp: hoursAgo(24),
-    },
-    // System
-    {
-      id: uid(), type: 'review_received', category: 'system',
-      title: 'New Review',
-      message: `${rnd(ARTISTS)} left a ★★★★★ review: "Incredible detail and fast delivery!"`,
-      link: '/dashboard', read: false, timestamp: hoursAgo(6),
-    },
-    {
-      id: uid(), type: 'new_follower', category: 'system',
-      title: 'New Follower',
-      message: `${rnd(ARTISTS)} started following your profile`,
-      link: '/dashboard', read: true, timestamp: hoursAgo(14),
-    },
-    {
-      id: uid(), type: 'system', category: 'system',
-      title: 'COVEN Platform Update',
-      message: 'Market Pulse analytics and Studio Hub features are now live. Check your dashboard!',
-      link: '/market-pulse', read: true, timestamp: hoursAgo(48),
+      id: uid(),
+      type: 'system',
+      category: 'system',
+      title: 'Welcome to COVEN Syndicate',
+      message: 'Your cryptographic identity is initialized. Connect with artists, bid on authentic Torn artwork, and install the official UserScript.',
+      link: '/userscript',
+      read: false,
+      timestamp: new Date().toISOString(),
     },
   ];
-  return notifs;
 }

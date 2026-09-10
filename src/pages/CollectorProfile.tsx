@@ -35,7 +35,7 @@ export function CollectorProfile() {
   const currentUserId = user ? String(user.player_id) : 'demo';
   const profileId = id || currentUserId;
 
-  const profile = useMemo(() => getCollectorProfile(profileId), [profileId]);
+  const profile = useMemo(() => getCollectorProfile(profileId, user), [profileId, user]);
   const followedArtistIds = useMemo(() => getFollowedArtistIds(profileId), [profileId]);
 
   const [activeTab, setActiveTab] = useState<'vault' | 'radar' | 'badges'>('vault');

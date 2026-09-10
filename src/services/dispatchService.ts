@@ -1,4 +1,4 @@
-﻿/* ================================================================
+/* ================================================================
    COVEN — The Wire (Encrypted Dispatches & Direct Comms) Service
    localStorage-backed P2P encrypted chat threads with lore simulator.
    ================================================================ */
@@ -15,195 +15,6 @@ function msgId(): string {
 
 function threadId(): string {
   return `wire_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-}
-
-/* ── SEED DATA GENERATORS ─────────────────────────────────── */
-function getInitialSeedThreads(): DispatchThread[] {
-  return [
-    {
-      id: 'wire_sintex_01',
-      participant_id: 'artist-1',
-      participant_name: 'SINTEX',
-      participant_avatar: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&auto=format&fit=crop&q=80',
-      participant_role: 'artist',
-      participant_tier: 'legend',
-      participant_torn_id: '1940211',
-      participant_faction: 'Monarch Syndicate',
-      last_message: 'Can deliver within 48h once the 25M Torn Cash milestone is locked in escrow.',
-      last_timestamp: new Date(Date.now() - 22 * 60_000).toISOString(),
-      unread_count: 1,
-      status: 'online',
-      context_type: 'commission',
-      context_id: 'c1',
-      context_title: 'Faction War Banner & Honor Bar Set',
-      is_pinned: true,
-    },
-    {
-      id: 'wire_nyx_02',
-      participant_id: 'artist-2',
-      participant_name: 'Nyx',
-      participant_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      participant_role: 'artist',
-      participant_tier: 'master',
-      participant_torn_id: '2049182',
-      participant_faction: 'Natural Selection',
-      last_message: 'All winning bidders get full vault access plus a complimentary 400x150 signature crop.',
-      last_timestamp: new Date(Date.now() - 3 * 3600_000).toISOString(),
-      unread_count: 0,
-      status: 'busy',
-      context_type: 'inquiry',
-      context_id: 'a1',
-      context_title: 'Neon Shinjuku 2099',
-      is_pinned: false,
-    },
-    {
-      id: 'wire_cyberkitsune_03',
-      participant_id: 'artist-3',
-      participant_name: 'CyberKitsune',
-      participant_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      participant_role: 'artist',
-      participant_tier: 'trusted',
-      participant_torn_id: '2381900',
-      participant_faction: 'JTF Recon',
-      last_message: 'Appreciate the syndicate business. Ping me on the wire anytime you need new profile propaganda.',
-      last_timestamp: new Date(Date.now() - 26 * 3600_000).toISOString(),
-      unread_count: 0,
-      status: 'in_vault',
-      context_type: 'trade',
-      context_id: 't-9844',
-      context_title: 'Escrow Release #TX-9844',
-      is_pinned: false,
-    },
-  ];
-}
-
-function getInitialSeedMessages(threadId: string): DispatchMessage[] {
-  if (threadId === 'wire_sintex_01') {
-    return [
-      {
-        id: 'msg_s1',
-        thread_id: 'wire_sintex_01',
-        sender_id: 'artist-1',
-        sender_name: 'SINTEX',
-        sender_avatar: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&auto=format&fit=crop&q=80',
-        content: 'Received your brief for the Syndicate War Banner. I have drafted the preliminary 3D chrome rendering. Do you want the skull motif with neon cyan or blood phosphor highlights?',
-        timestamp: new Date(Date.now() - 45 * 60_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-      },
-      {
-        id: 'msg_s2',
-        thread_id: 'wire_sintex_01',
-        sender_id: 'current_user',
-        sender_name: 'You',
-        content: 'Blood phosphor highlights to match our faction hall theme. What is the turnaround for the animated GIF version?',
-        timestamp: new Date(Date.now() - 35 * 60_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-      },
-      {
-        id: 'msg_s3',
-        thread_id: 'wire_sintex_01',
-        sender_id: 'artist-1',
-        sender_name: 'SINTEX',
-        sender_avatar: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&auto=format&fit=crop&q=80',
-        content: 'Can deliver within 48h once the 25M Torn Cash milestone is locked in escrow. BBCode template is included with auto-resizing canvas.',
-        timestamp: new Date(Date.now() - 22 * 60_000).toISOString(),
-        read: false,
-        status: 'encrypted',
-        attachment: {
-          type: 'commission',
-          id: 'c1',
-          title: 'Syndicate War Banner Set',
-          subtitle: 'Milestone 1/2 · 25,000,000 Torn Cash',
-          price_torn: 25000000,
-          status: 'Locked in Escrow',
-        },
-      },
-    ];
-  }
-
-  if (threadId === 'wire_nyx_02') {
-    return [
-      {
-        id: 'msg_n1',
-        thread_id: 'wire_nyx_02',
-        sender_id: 'current_user',
-        sender_name: 'You',
-        content: 'Hey Nyx, watching your auction for Neon Shinjuku 2099. Does the package include a custom 400x150 signature crop if I win?',
-        timestamp: new Date(Date.now() - 4 * 3600_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-        attachment: {
-          type: 'artwork',
-          id: 'a1',
-          title: 'Neon Shinjuku 2099',
-          subtitle: 'Reserve Met · Current Bid: $1,250,000',
-          image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80',
-          price_torn: 1250000,
-          status: 'Active Auction',
-        },
-      },
-      {
-        id: 'msg_n2',
-        thread_id: 'wire_nyx_02',
-        sender_id: 'artist-2',
-        sender_name: 'Nyx',
-        sender_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        content: 'All winning bidders get full vault access plus a complimentary 400x150 signature crop and transparent PNG asset. Good luck on the auction block!',
-        timestamp: new Date(Date.now() - 3 * 3600_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-      },
-    ];
-  }
-
-  if (threadId === 'wire_cyberkitsune_03') {
-    return [
-      {
-        id: 'msg_c1',
-        thread_id: 'wire_cyberkitsune_03',
-        sender_id: 'artist-3',
-        sender_name: 'CyberKitsune',
-        sender_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-        content: 'Escrow funds verified. I have unlocked your high-res unwatermarked PSD and GIF deliverables in the vault.',
-        timestamp: new Date(Date.now() - 27 * 3600_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-        attachment: {
-          type: 'escrow',
-          id: 't-9844',
-          title: 'Escrow Release #TX-9844',
-          subtitle: '$8,500,000 Torn Cash Transferred',
-          price_torn: 8500000,
-          status: 'Vault Cleared',
-        },
-      },
-      {
-        id: 'msg_c2',
-        thread_id: 'wire_cyberkitsune_03',
-        sender_id: 'current_user',
-        sender_name: 'You',
-        content: 'Downloaded the files. The glitch animations look incredible on the Torn forums. Left you a 5-star review!',
-        timestamp: new Date(Date.now() - 26 * 3600_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-      },
-      {
-        id: 'msg_c3',
-        thread_id: 'wire_cyberkitsune_03',
-        sender_id: 'artist-3',
-        sender_name: 'CyberKitsune',
-        sender_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-        content: 'Appreciate the syndicate business. Ping me on the wire anytime you need new profile propaganda.',
-        timestamp: new Date(Date.now() - 25 * 3600_000).toISOString(),
-        read: true,
-        status: 'encrypted',
-      },
-    ];
-  }
-
-  return [];
 }
 
 /* ── STORAGE HELPERS ───────────────────────────────────────── */
@@ -242,15 +53,7 @@ function notifyDispatchUpdate(): void {
 /* ── PUBLIC API ────────────────────────────────────────────── */
 
 export function getThreads(userId: string): DispatchThread[] {
-  let threads = readThreads(userId);
-  if (threads.length === 0) {
-    threads = getInitialSeedThreads();
-    writeThreads(userId, threads);
-    // write seed messages
-    for (const t of threads) {
-      writeMessages(t.id, getInitialSeedMessages(t.id));
-    }
-  }
+  const threads = readThreads(userId);
   return threads.sort((a, b) => {
     if (a.is_pinned && !b.is_pinned) return -1;
     if (!a.is_pinned && b.is_pinned) return 1;
@@ -264,13 +67,7 @@ export function getThread(userId: string, tId: string): DispatchThread | undefin
 }
 
 export function getMessages(tId: string): DispatchMessage[] {
-  let msgs = readMessages(tId);
-  if (msgs.length === 0) {
-    msgs = getInitialSeedMessages(tId);
-    if (msgs.length > 0) {
-      writeMessages(tId, msgs);
-    }
-  }
+  const msgs = readMessages(tId);
   return msgs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 }
 

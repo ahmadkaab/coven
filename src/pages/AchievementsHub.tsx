@@ -49,7 +49,7 @@ export function AchievementsHub() {
   const { toast } = useToast();
   const { user } = useAuthStore();
   const avatarUrl = user?.profile_image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80';
-  const username = user?.name || 'ahmad_kaab';
+  const username = user?.name || 'Syndicate Operative';
 
   const [activeTab, setActiveTab] = useState<'accreditations' | 'armory'>('accreditations');
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'ALL' | 'UNCLAIMED'>('ALL');

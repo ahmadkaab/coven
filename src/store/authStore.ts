@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { fetchTornProfile, upsertUser, getArtistByTornId } from '../services/authService';
 import type { TornUser } from '../types';
-import { DEMO_PERSONAS, type DemoPersona } from '../config/demoPersonas';
 
 interface AuthState {
   /* State */
@@ -16,7 +15,6 @@ interface AuthState {
 
   /* Actions */
   signIn:             (apiKey: string, tornId?: string) => Promise<boolean>;
-  loginAsDemoPersona: (persona: DemoPersona) => void;
   logout:             () => void;
   setArtist:          (artistId: string) => void;   // called after registration
 
@@ -45,30 +43,13 @@ export const useAuthStore = create<AuthState>()(
           const trimmedKey = apiKey.trim();
           if (!trimmedKey) throw new Error('Please enter your Torn API key.');
 
-          // 1. Check if it matches a demo persona key for quick testing
-          const demoMatch = DEMO_PERSONAS.find(
-            (p: DemoPersona) => p.apiKey.toLowerCase() === trimmedKey.toLowerCase()
-          );
-          if (demoMatch) {
-            set({
-              user:     demoMatch.user,
-              apiKey:   demoMatch.apiKey,
-              userId:   demoMatch.userId,
-              artistId: demoMatch.artistId,
-              isArtist: demoMatch.isArtist,
-              loading:  false,
-              error:    null,
-            });
-            return true;
-          }
-
-          // 2. Query Torn API directly — automatically resolves player_id, name, rank, level, faction, etc.
+          // 1. Query Torn API directly — automatically resolves player_id, name, rank, level, faction, etc.
           const profile = await fetchTornProfile(trimmedKey);
 
-          // 3. Upsert into Supabase — get internal UUID + artist flag
+          // 2. Upsert into Supabase — get internal UUID + artist flag
           const { id: userId, is_artist } = await upsertUser(profile);
 
-          // 4. Check for artist profile
+          // 3. Check for artist profile
           const artistId = is_artist
             ? await getArtistByTornId(String(profile.player_id))
             : null;
@@ -87,18 +68,6 @@ export const useAuthStore = create<AuthState>()(
           set({ loading: false, error: err.message ?? 'Login failed — could not authenticate API key' });
           return false;
         }
-      },
-
-      loginAsDemoPersona: (persona: DemoPersona) => {
-        set({
-          user:     persona.user,
-          apiKey:   persona.apiKey,
-          userId:   persona.userId,
-          artistId: persona.artistId,
-          isArtist: persona.isArtist,
-          loading:  false,
-          error:    null,
-        });
       },
 
       logout: () =>

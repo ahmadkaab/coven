@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useToast } from '../context/ToastContext';
-import { DEMO_PERSONAS, type DemoPersona } from '../config/demoPersonas';
-import { Lightning, ArrowRight, ShieldCheck, ArrowSquareOut, Copy, Check } from '@phosphor-icons/react';
+import { ShieldCheck, ArrowSquareOut, Copy, Check } from '@phosphor-icons/react';
 
 export function Login() {
-  const { signIn, loginAsDemoPersona, loading, error } = useAuthStore();
+  const { signIn, loading, error } = useAuthStore();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [apiKey, setApiKey] = useState('');
@@ -37,14 +36,7 @@ export function Login() {
     }
   };
 
-  const handleDemoLogin = (persona: DemoPersona) => {
-    loginAsDemoPersona(persona);
-    toast.success(
-      `Logged in as ${persona.name}`,
-      `Active Role: ${persona.roleLabel} [Torn ID #${persona.tornId}]`
-    );
-    navigate('/dashboard');
-  };
+
 
   return (
     <div className="login-page">
@@ -77,107 +69,7 @@ export function Login() {
           </div>
         )}
 
-        {/* ── QUICK DEMO PERSONAS ──────────────────────────────── */}
-        <div style={{
-          marginBottom: 'var(--sp-6)',
-          paddingBottom: 'var(--sp-6)',
-          borderBottom: '1px solid var(--seam)',
-        }}>
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.625rem',
-            color: 'var(--term-green)',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            marginBottom: '10px',
-          }}>
-            <Lightning size={14} weight="fill" />
-            [ 1-CLICK TEST PERSONAS // DEMO MODE ]
-          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {DEMO_PERSONAS.map((p) => {
-              const isArtist = p.role === 'artist';
-              const roleBorder = isArtist ? 'var(--red)' : 'var(--term-green)';
-              const roleColor = isArtist ? 'var(--red-hi)' : 'var(--term-green)';
-
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => handleDemoLogin(p)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 14px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderLeft: `3px solid ${roleBorder}`,
-                    borderRadius: 'var(--r-sm)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                    e.currentTarget.style.borderColor = roleColor;
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.borderLeft = `3px solid ${roleBorder}`;
-                    e.currentTarget.style.transform = 'none';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {p.avatarUrl && (
-                      <img
-                        src={p.avatarUrl}
-                        alt={p.name}
-                        style={{ width: 36, height: 36, borderRadius: 'var(--r-sm)', objectFit: 'cover', border: '1px solid rgba(255, 255, 255, 0.1)' }}
-                      />
-                    )}
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--chalk)', fontWeight: 600 }}>
-                          {p.name}
-                        </span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)' }}>
-                          [#{p.tornId}]
-                        </span>
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: roleColor, textTransform: 'uppercase', marginTop: '2px' }}>
-                        {p.roleLabel} • {p.cashReserves}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.5625rem',
-                    color: 'var(--ghost)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    padding: '4px 8px',
-                    borderRadius: 'var(--r-sm)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                  }}>
-                    LOGIN <ArrowRight size={10} weight="bold" />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* ── GET CUSTOM TORN API KEY HELPER CARD ─────────────── */}
         <div style={{
@@ -271,7 +163,7 @@ export function Login() {
           textTransform: 'uppercase',
           marginBottom: 'var(--sp-3)',
         }}>
-          [ OR AUTHENTICATE WITH YOUR API KEY ]
+          [ AUTHENTICATE WITH YOUR TORN API KEY ]
         </div>
 
         <form onSubmit={handleSubmit} noValidate>

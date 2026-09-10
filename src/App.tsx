@@ -27,7 +27,6 @@ import { useAuthStore }      from './store/authStore';
 
 import { ToastProvider } from './context/ToastContext';
 import { ToastContainer } from './components/common/ToastContainer';
-import { PersonaSwitcher } from './components/common/PersonaSwitcher';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(s => s.user);
@@ -122,7 +121,6 @@ export default function App() {
         } />
       </Routes>
         <Footer />
-        <PersonaSwitcher />
         <ToastContainer />
       </ToastProvider>
     </BrowserRouter>
