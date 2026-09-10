@@ -2,21 +2,18 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   MARKET_INDICES,
   MARKET_OVERVIEW,
-  FACTION_LEADERBOARD,
   getInitialTradingEvents,
-  generateNextTradeEvent,
   calculateArtValuation,
   type MarketIndex,
   type MarketOverviewStats,
   type TradingEvent,
-  type FactionLeaderboardEntry,
   type ValuationParams,
   type ValuationResult,
 } from '../services/marketPulseService';
 
 export function useMarketIndices() {
   const [indices, setIndices] = useState<MarketIndex[]>(MARKET_INDICES);
-  const [overview, setOverview] = useState<MarketOverviewStats>(MARKET_OVERVIEW);
+  const [overview] = useState<MarketOverviewStats>(MARKET_OVERVIEW);
 
   // Micro-fluctuations every 12 seconds to give life to live terminal
   useEffect(() => {
@@ -40,27 +37,9 @@ export function useMarketIndices() {
   return { indices, overview };
 }
 
-export function useTradingTape(limit = 8, isLive = true) {
-  const [events, setEvents] = useState<TradingEvent[]>(getInitialTradingEvents);
-
-  useEffect(() => {
-    if (!isLive) return;
-
-    // Simulate real-time market activity every 7-10 seconds
-    const interval = setInterval(() => {
-      const nextEvent = generateNextTradeEvent();
-      setEvents((prev) => [nextEvent, ...prev.slice(0, limit - 1)]);
-    }, 7_500);
-
-    return () => clearInterval(interval);
-  }, [isLive, limit]);
-
+export function useTradingTape(_limit = 8, _isLive = true) {
+  const [events] = useState<TradingEvent[]>(getInitialTradingEvents);
   return { events };
-}
-
-export function useFactionLeaderboard() {
-  const leaderboard: FactionLeaderboardEntry[] = useMemo(() => FACTION_LEADERBOARD, []);
-  return { leaderboard };
 }
 
 export function useArtValuation() {

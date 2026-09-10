@@ -694,32 +694,38 @@ export function Dispatches() {
             </div>
 
             <div className="wire-modal-grid">
-              {availableArtworks.map((art) => (
-                <div
-                  key={art.id}
-                  onClick={() => {
-                    setPendingAttachment({
-                      type: 'artwork',
-                      id: art.id,
-                      title: art.title,
-                      subtitle: `${art.listing_type.toUpperCase()} · ${formatTornCash(art.listing_type === 'auction' ? art.current_bid ?? 0 : art.price_torn ?? 0)}`,
-                      image_url: art.image_url,
-                      price_torn: art.listing_type === 'auction' ? art.current_bid : art.price_torn,
-                      status: art.listing_type,
-                    });
-                    setAttachModalOpen(false);
-                  }}
-                  className="wire-modal-item"
-                >
-                  <img src={art.image_url} alt={art.title} className="wire-modal-thumb" />
-                  <div className="wire-modal-item-info">
-                    <span className="wire-modal-item-title">{art.title}</span>
-                    <span className="wire-modal-item-price">
-                      {formatTornCash(art.listing_type === 'auction' ? art.current_bid ?? 0 : art.price_torn ?? 0)}
-                    </span>
-                  </div>
+              {availableArtworks.length === 0 ? (
+                <div style={{ padding: '32px 16px', textAlign: 'center', gridColumn: '1 / -1', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ghost)' }}>
+                  NO ARTWORKS CURRENTLY INDEXED TO ATTACH
                 </div>
-              ))}
+              ) : (
+                availableArtworks.map((art) => (
+                  <div
+                    key={art.id}
+                    onClick={() => {
+                      setPendingAttachment({
+                        type: 'artwork',
+                        id: art.id,
+                        title: art.title,
+                        subtitle: `${art.listing_type.toUpperCase()} · ${formatTornCash(art.listing_type === 'auction' ? art.current_bid ?? 0 : art.price_torn ?? 0)}`,
+                        image_url: art.image_url,
+                        price_torn: art.listing_type === 'auction' ? art.current_bid : art.price_torn,
+                        status: art.listing_type,
+                      });
+                      setAttachModalOpen(false);
+                    }}
+                    className="wire-modal-item"
+                  >
+                    <img src={art.image_url} alt={art.title} className="wire-modal-thumb" />
+                    <div className="wire-modal-item-info">
+                      <span className="wire-modal-item-title">{art.title}</span>
+                      <span className="wire-modal-item-price">
+                        {formatTornCash(art.listing_type === 'auction' ? art.current_bid ?? 0 : art.price_torn ?? 0)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

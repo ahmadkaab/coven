@@ -103,14 +103,12 @@ export function CollectorProfile() {
                 <Crown size={12} weight="fill" /> {profile.collector_tier.toUpperCase()} PATRON
               </span>
               {profile.faction && (
-                <Link
-                  to={`/factions/${profile.faction.tag.toLowerCase() === 'mnch' ? 'monarch' : profile.faction.tag.toLowerCase()}`}
+                <span
                   className="collector-faction-tag"
-                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
-                  title="Inspect Faction Armory & Vault"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                 >
-                  [{profile.faction.tag}] {profile.faction.name.toUpperCase()} →
-                </Link>
+                  [{profile.faction.tag}] {profile.faction.name.toUpperCase()}
+                </span>
               )}
               <span className="collector-status-pill">● ACTIVE SYNDICATE</span>
             </div>
@@ -251,43 +249,70 @@ export function CollectorProfile() {
               </div>
             </div>
 
-            <div className="collector-vault-grid">
-              {ownedArtworks.map((art) => (
-                <div key={art.id} className="collector-art-card">
-                  <div className="collector-art-thumb-wrap">
-                    <img src={art.image_url} alt={art.title} className="collector-art-thumb" />
-                    <span className="collector-art-verified-badge">
-                      <Certificate size={11} weight="fill" /> VERIFIED MASTER
-                    </span>
-                  </div>
-
-                  <div className="collector-art-info">
-                    <div className="collector-art-meta">
-                      <span>BY {(art.artist?.username || 'ARTIST').toUpperCase()}</span>
-                      <span className="collector-art-price">
-                        {formatTornCash(art.listing_type === 'auction' ? art.current_bid ?? 0 : art.price_torn ?? 0)}
+            {ownedArtworks.length === 0 ? (
+              <div
+                className="card-industrial"
+                style={{
+                  padding: 'var(--sp-12)',
+                  textAlign: 'center',
+                  background: 'var(--pit)',
+                  border: '1px solid var(--wire)',
+                }}
+              >
+                <LockKey size={36} color="var(--ghost)" style={{ marginBottom: '12px' }} />
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--chalk)', marginBottom: '6px' }}>
+                  PRIVATE TROPHY VAULT EMPTY
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)', maxWidth: '420px', margin: '0 auto 16px', lineHeight: 1.5 }}>
+                  You do not currently hold any unwatermarked master deliverables in your private vault. Win live auctions or acquire direct sales to store certified artwork here.
+                </p>
+                <Link
+                  to="/browse"
+                  className="btn btn-industrial"
+                  style={{ background: 'var(--red)', color: '#fff', margin: '0 auto', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  EXPLORE MARKETPLACE
+                </Link>
+              </div>
+            ) : (
+              <div className="collector-vault-grid">
+                {ownedArtworks.map((art) => (
+                  <div key={art.id} className="collector-art-card">
+                    <div className="collector-art-thumb-wrap">
+                      <img src={art.image_url} alt={art.title} className="collector-art-thumb" />
+                      <span className="collector-art-verified-badge">
+                        <Certificate size={11} weight="fill" /> VERIFIED MASTER
                       </span>
                     </div>
 
-                    <h3 className="collector-art-title">{art.title}</h3>
+                    <div className="collector-art-info">
+                      <div className="collector-art-meta">
+                        <span>BY {(art.artist?.username || 'ARTIST').toUpperCase()}</span>
+                        <span className="collector-art-price">
+                          {formatTornCash(art.listing_type === 'auction' ? art.current_bid ?? 0 : art.price_torn ?? 0)}
+                        </span>
+                      </div>
 
-                    <div className="collector-art-footer" style={{ display: 'flex', gap: '6px' }}>
-                      <Link to={`/artwork/${art.id}`} className="collector-art-inspect-btn" style={{ flex: 1 }}>
-                        INSPECT <ArrowSquareOut size={12} />
-                      </Link>
-                      <Link
-                        to="/trade"
-                        className="btn btn-ghost btn-sm"
-                        style={{ padding: '6px 8px', fontSize: '0.625rem', borderColor: 'var(--wire)', color: 'var(--ghost)', textDecoration: 'none' }}
-                        title="Propose a trade swap with this artwork"
-                      >
-                        SWAP
-                      </Link>
+                      <h3 className="collector-art-title">{art.title}</h3>
+
+                      <div className="collector-art-footer" style={{ display: 'flex', gap: '6px' }}>
+                        <Link to={`/artwork/${art.id}`} className="collector-art-inspect-btn" style={{ flex: 1 }}>
+                          INSPECT <ArrowSquareOut size={12} />
+                        </Link>
+                        <Link
+                          to="/trade"
+                          className="btn btn-ghost btn-sm"
+                          style={{ padding: '6px 8px', fontSize: '0.625rem', borderColor: 'var(--wire)', color: 'var(--ghost)', textDecoration: 'none' }}
+                          title="Propose a trade swap with this artwork"
+                        >
+                          SWAP
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -306,51 +331,53 @@ export function CollectorProfile() {
               </span>
             </div>
 
-            <div className="collector-radar-grid">
-              {followedArtists.map((artist) => (
-                <div key={artist.id} className="collector-radar-card">
-                  <div className="collector-radar-top">
-                    <img
-                      src={artist.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
-                      alt={artist.username}
-                      className="collector-radar-avatar"
-                    />
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span className="collector-radar-name">{artist.username}</span>
-                        {artist.tier && (
-                          <span className={`badge badge-${artist.tier}`} style={{ fontSize: '0.5625rem' }}>
-                            {artist.tier.toUpperCase()}
-                          </span>
-                        )}
+            {followedArtists.length === 0 ? (
+              <div
+                className="card-industrial"
+                style={{
+                  padding: 'var(--sp-12)',
+                  textAlign: 'center',
+                  background: 'var(--pit)',
+                  border: '1px solid var(--wire)',
+                }}
+              >
+                <Palette size={36} color="var(--ghost)" style={{ marginBottom: '12px' }} />
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--chalk)', marginBottom: '6px' }}>
+                  NO ARTISTS CURRENTLY PINNED
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)', maxWidth: '420px', margin: '0 auto 16px', lineHeight: 1.5 }}>
+                  Follow verified Torn creators from their public profiles to receive real-time alerts when they drop new artworks or open custom commission slots.
+                </p>
+                <Link
+                  to="/artists"
+                  className="btn btn-industrial"
+                  style={{ background: 'var(--red)', color: '#fff', margin: '0 auto', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  DISCOVER ARTISTS
+                </Link>
+              </div>
+            ) : (
+              <div className="collector-vault-grid">
+                {followedArtists.map((artist) => (
+                  <div key={artist.id} className="collector-art-card">
+                    <div style={{ padding: 'var(--sp-4)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                        <img src={artist.avatar_url} alt={artist.username} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--phosphor)' }}>{artist.username}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--term-green)' }}>
+                            {artist.is_verified ? 'VERIFIED CREATOR' : 'SYNDICATE ARTIST'}
+                          </div>
+                        </div>
                       </div>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)' }}>
-                        {artist.specialization || 'Underground GFX'}
-                      </span>
+                      <Link to={`/artist/${artist.id}`} className="collector-art-inspect-btn" style={{ width: '100%', justifyContent: 'center' }}>
+                        VIEW PROFILE <ArrowSquareOut size={12} />
+                      </Link>
                     </div>
                   </div>
-
-                  <p className="collector-radar-bio">{artist.bio}</p>
-
-                  <div className="collector-radar-actions">
-                    <Link
-                      to={`/artists/${artist.id}`}
-                      className="btn btn-ghost btn-sm"
-                      style={{ flex: 1, justifyContent: 'center', fontSize: '0.625rem' }}
-                    >
-                      Dossier
-                    </Link>
-                    <Link
-                      to={`/dispatches?artistId=${artist.id}`}
-                      className="btn btn-primary btn-sm"
-                      style={{ flex: 1, justifyContent: 'center', fontSize: '0.625rem', gap: '4px' }}
-                    >
-                      <Chats size={12} weight="bold" /> Dispatch
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

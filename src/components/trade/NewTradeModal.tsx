@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, ArrowsLeftRight, ShieldCheck, CheckCircle, PlusCircle } from '@phosphor-icons/react';
 import { createTradeOffer } from '../../services/tradeService';
 import { useToast } from '../../context/ToastContext';
+import { useAuthStore } from '../../store/authStore';
 import { SEED_ARTWORKS } from '../../data/seed';
 import type { TradeOffer, TradeAsset, TradeParty } from '../../types/trade';
 
@@ -27,6 +28,7 @@ export function NewTradeModal({
   initialOfferedArtworkId,
 }: NewTradeModalProps) {
   const { addToast } = useToast();
+  const { user } = useAuthStore();
 
   const [selectedMyArtId, setSelectedMyArtId] = useState<string>(
     initialOfferedArtworkId || SEED_ARTWORKS[0]?.id || ''
@@ -42,18 +44,18 @@ export function NewTradeModal({
 
   if (!isOpen) return null;
 
-  const mySelectedArt = SEED_ARTWORKS.find((a) => a.id === selectedMyArtId) || SEED_ARTWORKS[0];
+  const mySelectedArt = SEED_ARTWORKS.find((a) => a.id === selectedMyArtId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const initiatorParty: TradeParty = {
-      userId: 'user-demo',
-      username: 'SINTEX',
-      tornPlayerId: 2190421,
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      factionTag: 'MNCH',
+      userId: user ? `user-${user.player_id}` : 'user-demo',
+      username: user?.name || 'OPERATIVE',
+      tornPlayerId: user?.player_id || 0,
+      avatarUrl: user?.profile_image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      factionTag: user?.faction?.faction_name ? user.faction.faction_name.slice(0, 4).toUpperCase() : 'COVEN',
       isInitiator: true,
       hasLocked: true,
       hasAccepted: false,
@@ -274,7 +276,7 @@ export function NewTradeModal({
                     marginBottom: '10px',
                   }}
                 >
-                  YOUR OFFER (SINTEX)
+                  YOUR OFFER ({user?.name ? user.name.toUpperCase() : 'YOU'})
                 </div>
 
                 {/* My Artwork Select */}
@@ -305,11 +307,15 @@ export function NewTradeModal({
                       outline: 'none',
                     }}
                   >
-                    {SEED_ARTWORKS.slice(0, 4).map((art) => (
-                      <option key={art.id} value={art.id}>
-                        {art.title} (${(((art.price_torn ?? 0)) / 1_000_000).toFixed(1)}M)
-                      </option>
-                    ))}
+                    {SEED_ARTWORKS.length === 0 ? (
+                      <option value="">No Vault Pieces (Cash Offer Only)</option>
+                    ) : (
+                      SEED_ARTWORKS.slice(0, 4).map((art) => (
+                        <option key={art.id} value={art.id}>
+                          {art.title} (${(((art.price_torn ?? 0)) / 1_000_000).toFixed(1)}M)
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 

@@ -6,7 +6,6 @@ import {
 } from '@phosphor-icons/react';
 import { TickerTape } from '../components/pulse/TickerTape';
 import { LiveTradingFeed } from '../components/pulse/LiveTradingFeed';
-import { FactionLeaderboard } from '../components/pulse/FactionLeaderboard';
 import { ArtValuationCalculator } from '../components/pulse/ArtValuationCalculator';
 import { useMarketIndices } from '../hooks/useMarketPulse';
 import { formatTornCash } from '../utils/format';
@@ -217,8 +216,6 @@ export function MarketPulse() {
               </div>
             </div>
 
-            {/* Faction Patron Leaderboard */}
-            <FactionLeaderboard />
 
             {/* Syndicate Notice Box */}
             <div style={{

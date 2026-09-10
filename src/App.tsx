@@ -15,8 +15,6 @@ import { MarketPulse }   from './pages/MarketPulse';
 import { Notifications }    from './pages/Notifications';
 import { Dispatches }       from './pages/Dispatches';
 import { CollectorProfile } from './pages/CollectorProfile';
-import { Factions }         from './pages/Factions';
-import { FactionDetail }    from './pages/FactionDetail';
 import { TradeDesk }        from './pages/TradeDesk';
 import { HeistOperations }   from './pages/HeistOperations';
 import { AchievementsHub }   from './pages/AchievementsHub';
@@ -46,9 +44,6 @@ export default function App() {
         <Route path="/artist/:id"     element={<ArtistProfile />} />
         <Route path="/artwork/:id"    element={<ArtworkDetail />} />
         <Route path="/auctions"       element={<Browse />} />
-        <Route path="/factions"       element={<Factions />} />
-        <Route path="/factions/:id"   element={<FactionDetail />} />
-        <Route path="/faction/:id"    element={<FactionDetail />} />
         <Route path="/trade"          element={<TradeDesk />} />
         <Route path="/trade/:id"      element={<TradeDesk />} />
         <Route path="/trade/new"      element={<TradeDesk />} />

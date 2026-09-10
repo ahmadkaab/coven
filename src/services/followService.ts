@@ -4,6 +4,7 @@
    ================================================================ */
 
 import type { CollectorProfile, CollectorBadge } from '../types/collector';
+import type { TornUser } from '../types';
 import { dispatchNotification } from './notificationService';
 
 const RADAR_KEY = (uid: string) => `coven_radar_follows_${uid}`;
@@ -84,7 +85,7 @@ export function getFollowerCount(artistId: string, currentUserId?: string): numb
 
 export function getCollectorProfile(
   userId: string,
-  currentUser?: { player_id: number; name: string; rank?: string; level?: number; profile_image?: string } | null
+  currentUser?: TornUser | null
 ): CollectorProfile {
   const badges: CollectorBadge[] = [
     {
@@ -142,18 +143,18 @@ export function getCollectorProfile(
     avatar_url: avatar,
     rank,
     level,
-    faction: {
-      id: 9410,
-      name: 'Monarch Syndicate',
-      tag: 'MON',
-    },
-    motto: 'In the dark underbelly of Torn, authentic reputation is the only currency that never devalues.',
-    joined_coven: new Date(Date.now() - 120 * 86400_000).toISOString(),
-    total_invested_torn: 74500000, // $74.5M
-    artworks_owned_count: 6,
-    commissions_funded_count: 9,
-    collector_tier: 'whale',
+    faction: currentUser?.faction ? {
+      id: currentUser.faction.faction_id || 0,
+      name: currentUser.faction.faction_name || '',
+      tag: currentUser.faction.faction_name ? currentUser.faction.faction_name.slice(0, 4).toUpperCase() : 'COVEN',
+    } : undefined,
+    motto: 'Reputation is the true currency of Torn City.',
+    joined_coven: new Date().toISOString(),
+    total_invested_torn: 0,
+    artworks_owned_count: 0,
+    commissions_funded_count: 0,
+    collector_tier: 'patron',
     badges,
-    favorite_specialization: 'Dark Fantasy & Faction War Graphics',
+    favorite_specialization: 'Custom Graphics & Forum Art',
   };
 }

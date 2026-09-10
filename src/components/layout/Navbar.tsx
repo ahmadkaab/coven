@@ -149,7 +149,6 @@ export function Navbar() {
     { href: '/artists', label: 'Artists' },
     { href: '/auctions', label: 'Auctions' },
     { href: '/commissions', label: 'Commissions' },
-    { href: '/factions', label: 'Factions' },
     { href: '/trade', label: 'Trade' },
     { href: '/heist', label: 'Heists' },
     { href: '/achievements', label: 'Accolades' },

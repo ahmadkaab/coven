@@ -655,31 +655,39 @@ export function HeistOperations() {
                   </tr>
                 </thead>
                 <tbody>
-                  {vaultSecurity.recentIntrusions.map((int) => (
-                    <tr key={int.id} style={{ borderBottom: '1px solid var(--wire)' }}>
-                      <td style={{ padding: '12px', color: 'var(--ghost)' }}>{new Date(int.timestamp).toLocaleDateString()}</td>
-                      <td style={{ padding: '12px', color: 'var(--chalk)', fontWeight: 700 }}>
-                        {int.intruderCrew} [{int.intruderFaction}]
+                  {vaultSecurity.recentIntrusions.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: 'var(--ghost)' }}>
+                        NO INTRUSION ATTEMPTS LOGGED. VAULT INTEGRITY OPTIMAL.
                       </td>
-                      <td style={{ padding: '12px' }}>
-                        <span
-                          style={{
-                            color: 'var(--term-green)',
-                            background: 'rgba(16,185,129,0.1)',
-                            border: '1px solid var(--term-green)',
-                            padding: '2px 6px',
-                            fontSize: '0.625rem',
-                          }}
-                        >
-                          {int.outcome}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px', color: 'var(--term-green)', fontWeight: 700 }}>
-                        +${formatTornCash(int.lootProtectedValue)}
-                      </td>
-                      <td style={{ padding: '12px', color: 'var(--ghost)' }}>{int.log}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    vaultSecurity.recentIntrusions.map((int) => (
+                      <tr key={int.id} style={{ borderBottom: '1px solid var(--wire)' }}>
+                        <td style={{ padding: '12px', color: 'var(--ghost)' }}>{new Date(int.timestamp).toLocaleDateString()}</td>
+                        <td style={{ padding: '12px', color: 'var(--chalk)', fontWeight: 700 }}>
+                          {int.intruderCrew} [{int.intruderFaction}]
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <span
+                            style={{
+                              color: 'var(--term-green)',
+                              background: 'rgba(16,185,129,0.1)',
+                              border: '1px solid var(--term-green)',
+                              padding: '2px 6px',
+                              fontSize: '0.625rem',
+                            }}
+                          >
+                            {int.outcome}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px', color: 'var(--term-green)', fontWeight: 700 }}>
+                          +${formatTornCash(int.lootProtectedValue)}
+                        </td>
+                        <td style={{ padding: '12px', color: 'var(--ghost)' }}>{int.log}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

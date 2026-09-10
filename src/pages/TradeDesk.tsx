@@ -809,10 +809,10 @@ export function TradeDesk() {
                 }}
               >
                 <Sparkle size={14} />
-                LATEST SETTLEMENT:
+                ESCROW ENGINE:
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--chalk)', whiteSpace: 'nowrap' }}>
-                SINTEX swapped "Void Titan #01" to Kage_Zero [SUB] for "Cyber Ronin Signature Suite" + $15.0M Torn Cash
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ghost)', whiteSpace: 'nowrap' }}>
+                Dual-sided P2P escrow active • Log #4810 payment verification enabled for cash sweeteners
               </div>
             </div>
 
@@ -922,17 +922,46 @@ export function TradeDesk() {
             </div>
 
             {/* Trades Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-                gap: '20px',
-              }}
-            >
-              {filteredTrades.map((trade) => (
-                <TradeCard key={trade.id} trade={trade} onSelect={handleSelectTrade} />
-              ))}
-            </div>
+            {filteredTrades.length === 0 ? (
+              <div
+                className="card-industrial"
+                style={{
+                  padding: 'var(--sp-12)',
+                  textAlign: 'center',
+                  background: 'var(--pit)',
+                  border: '1px solid var(--wire)',
+                }}
+              >
+                <ArrowsLeftRight size={36} color="var(--ghost)" style={{ marginBottom: '12px' }} />
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--chalk)', marginBottom: '6px' }}>
+                  NO P2P TRADE OFFERS LISTED
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)', maxWidth: '440px', margin: '0 auto 16px', lineHeight: 1.5 }}>
+                  There are currently no active public barter contracts. Propose a dual-escrow swap to barter authentic artwork and cash sweeteners with other Torn collectors.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsNewModalOpen(true)}
+                  className="btn btn-industrial"
+                  style={{ background: 'var(--red)', color: '#fff', margin: '0 auto', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <PlusCircle size={16} />
+                  PROPOSE NEW TRADE
+                </button>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                  gap: '20px',
+                }}
+              >
+                {filteredTrades.map((trade) => (
+                  <TradeCard key={trade.id} trade={trade} onSelect={handleSelectTrade} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -74,26 +74,7 @@ const DEFAULT_VAULT_SECURITY: VaultSecurity = {
   breachResistancePct: 68,
   alarmResponseTime: '38 SECONDS',
   defenseUpgrades: DEFAULT_DEFENSE_UPGRADES,
-  recentIntrusions: [
-    {
-      id: 'int-01',
-      timestamp: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
-      intruderFaction: 'Natural Selection',
-      intruderCrew: 'Viper Infiltration Squad',
-      outcome: 'DEFENSE_HELD',
-      lootProtectedValue: 45000000,
-      log: 'Hostile slicer detected at perimeter. Biometric cipher lockout activated; intruders evacuated.',
-    },
-    {
-      id: 'int-02',
-      timestamp: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
-      intruderFaction: 'Freelance Syndicate',
-      intruderCrew: 'Black Market Safecracker',
-      outcome: 'ALARM_TRIGGERED',
-      lootProtectedValue: 28000000,
-      log: 'Laser tripline tripped in gallery corridor. Silent alarm alerted Torn police squad; perpetrator arrested.',
-    },
-  ],
+  recentIntrusions: [],
 };
 
 /* ── SEED DATA: HEIST TARGETS ──────────────────────────────── */

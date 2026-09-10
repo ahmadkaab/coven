@@ -101,8 +101,19 @@ export function LiveTradingFeed() {
 
       {/* Events List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'var(--seam)' }}>
-        <AnimatePresence initial={false}>
-          {events.map((evt) => {
+        {events.length === 0 ? (
+          <div style={{ padding: 'var(--sp-8)', textAlign: 'center', background: 'var(--pit)' }}>
+            <Broadcast size={28} color="var(--ghost)" style={{ marginBottom: '8px' }} />
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--chalk)', marginBottom: '4px' }}>
+              NO TRANSACTION TELEMETRY RECORDED
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--ghost)' }}>
+              Completed escrow trades and auction settlements will stream live to this tape.
+            </div>
+          </div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {events.map((evt) => {
             const badge = getEventBadge(evt.type);
             return (
               <motion.div
@@ -204,6 +215,7 @@ export function LiveTradingFeed() {
             );
           })}
         </AnimatePresence>
+      )}
       </div>
     </div>
   );
