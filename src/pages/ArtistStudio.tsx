@@ -18,7 +18,12 @@ import { useToast } from '../context/ToastContext';
 import { useArtistStudio } from '../hooks/useStudio';
 import { AHMAD_SOVEREIGN_ARTIST } from '../services/artistService';
 import { getArtistCommissions, updateCommissionStatus } from '../services/commissionService';
-import { generateForumShopBBCode, type StudioStatus } from '../services/studioService';
+import type { StudioStatus } from '../services/studioService';
+import {
+  generateTornForumShopHtml,
+  generateTornForumSignatureHtml,
+  generateTornVouchReceiptHtml,
+} from '../utils/tornHtml';
 import { CR_PER_XANAX, convertCreditsToXanax } from '../services/walletService';
 import { useArtworks } from '../hooks/useData';
 import type { Commission, Artwork } from '../types';
@@ -34,7 +39,9 @@ export function ArtistStudio() {
   const [activeTab, setActiveTab] = useState<'queue' | 'drops' | 'portfolio' | 'config' | 'forum'>('queue');
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [loadingCommissions, setLoadingCommissions] = useState(true);
-  const [bbcodeCopied, setBbcodeCopied] = useState(false);
+  const [htmlCopied, setHtmlCopied] = useState(false);
+  const [htmlTemplate, setHtmlTemplate] = useState<'thread' | 'signature' | 'vouch'>('thread');
+  const [htmlViewMode, setHtmlViewMode] = useState<'preview' | 'code'>('preview');
 
   // Delivery Modal State
   const [deliveringComm, setDeliveringComm] = useState<Commission | null>(null);
@@ -110,17 +117,74 @@ export function ArtistStudio() {
     }
   };
 
-  // Copy BBCode
-  const handleCopyBBCode = () => {
-    const bbcode = generateForumShopBBCode(studio, AHMAD_SOVEREIGN_ARTIST, portfolioArtworks[0]);
-    navigator.clipboard.writeText(bbcode);
-    setBbcodeCopied(true);
-    addToast({
-      type: 'success',
-      title: 'BBCode Copied',
-      message: 'Forum shop thread copied to clipboard! Paste directly into Torn City forums.',
-    });
-    setTimeout(() => setBbcodeCopied(false), 2500);
+  // Generate active Torn Raw HTML
+  const getActiveTornHtml = (): string => {
+    if (htmlTemplate === 'signature') {
+      return generateTornForumSignatureHtml(AHMAD_SOVEREIGN_ARTIST, studio);
+    }
+    if (htmlTemplate === 'vouch') {
+      const art = portfolioArtworks[0];
+      return generateTornVouchReceiptHtml({
+        id: 'coven-vouch-sample-8819',
+        buyer_user_id: 'user-collector-99',
+        seller_user_id: artistId,
+        artwork_id: art?.id || 'art-01',
+        amount: 8000000,
+        status: 'verified',
+        torn_log_id: '4810-77192',
+        created_at: new Date(Date.now() - 7200000).toISOString(),
+        verified_at: new Date(Date.now() - 3600000).toISOString(),
+        buyer: { id: 'user-collector-99', username: 'GothicBaron', torn_id: '2981042' },
+        seller: { id: artistId, username: 'ahmad_kaab', torn_id: '4295891' },
+        artwork: art ? {
+          id: art.id,
+          title: art.title,
+          image_url: art.image_url || '/renaissance_hero.jpg',
+          thumbnail_url: art.thumbnail_url,
+          listing_type: art.listing_type,
+          price_torn: art.price_torn,
+          artist_id: art.artist_id,
+        } : undefined,
+      });
+    }
+    // Default 'thread' (Full Forum Shop 600px)
+    return generateTornForumShopHtml(
+      studio,
+      AHMAD_SOVEREIGN_ARTIST,
+      portfolioArtworks[0],
+      [
+        {
+          id: 'rev-1',
+          artist_id: artistId,
+          reviewer_user_id: 'rev-user-1',
+          rating: 5,
+          body: 'Ahmad delivered our faction banner in under 48 hours. Ultra-sharp 4K quality, verified settlement on COVEN.',
+          created_at: new Date().toISOString(),
+          reviewer: { username: 'SyndicateBoss', torn_id: '1940210' },
+        },
+      ]
+    );
+  };
+
+  // Copy Torn Raw HTML
+  const handleCopyTornHtml = async () => {
+    const code = getActiveTornHtml();
+    try {
+      await navigator.clipboard.writeText(code);
+      setHtmlCopied(true);
+      addToast({
+        type: 'success',
+        title: 'Torn Raw HTML Copied!',
+        message: 'Paste into Torn editor via Tools > Source code (<>) and click Save.',
+      });
+      setTimeout(() => setHtmlCopied(false), 2500);
+    } catch {
+      addToast({
+        type: 'error',
+        title: 'Copy Failed',
+        message: 'Please manually highlight and copy the HTML snippet.',
+      });
+    }
   };
 
   // Studio form updates
@@ -234,21 +298,24 @@ export function ArtistStudio() {
             </div>
           </div>
 
-          {/* Card 4: Forum Sync */}
+          {/* Card 4: Torn HTML Studio */}
           <div className="renaissance-stat-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)', letterSpacing: '0.1em' }}>
-                TORN FORUM SHOP
+                TORN FORUM HTML
               </span>
               <TerminalWindow size={16} weight="duotone" style={{ color: 'var(--antique-gold)' }} />
             </div>
             <button
-              onClick={handleCopyBBCode}
+              onClick={() => {
+                setActiveTab('forum');
+                handleCopyTornHtml();
+              }}
               className="renaissance-btn-gold"
               style={{ padding: '8px 12px', fontSize: '0.6875rem', width: '100%', justifyContent: 'center', minHeight: '36px' }}
             >
-              {bbcodeCopied ? <Check size={12} weight="bold" /> : <Copy size={12} weight="bold" />}
-              {bbcodeCopied ? 'BBCode Copied!' : 'Copy Forum Thread BBCode'}
+              {htmlCopied ? <Check size={12} weight="bold" /> : <Copy size={12} weight="bold" />}
+              {htmlCopied ? 'HTML Copied!' : 'Copy Torn Shop HTML'}
             </button>
           </div>
         </div>
@@ -260,7 +327,7 @@ export function ArtistStudio() {
             { id: 'drops', label: 'Release New Drop / Auction' },
             { id: 'portfolio', label: `My Portfolio (${portfolioArtworks.length})` },
             { id: 'config', label: 'Studio Controls & SLA' },
-            { id: 'forum', label: 'Torn BBCode Generator' },
+            { id: 'forum', label: 'Torn HTML Studio (600px)' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -633,46 +700,207 @@ export function ArtistStudio() {
           </div>
         )}
 
-        {/* ── TAB 5: TORN FORUM BBCODE TOOL ────────────────────────── */}
+        {/* ── TAB 5: TORN FORUM RAW HTML STUDIO ────────────────────── */}
         {activeTab === 'forum' && (
-          <div className="renaissance-glass-panel" style={{ padding: '24px 16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+          <div className="renaissance-glass-panel" style={{ padding: '24px 20px' }}>
+            {/* Header & Meta */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
               <div>
-                <h3 style={{ fontFamily: 'var(--font-cinzel)', fontSize: '1.3rem', color: '#fff', margin: 0 }}>
-                  Torn City Forum Shop BBCode Generator
+                <div style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--antique-gold)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  ⚡ 100% RAW HTML &amp; INLINE CSS &bull; NO BROKEN BBCODE
+                </div>
+                <h3 style={{ fontFamily: 'var(--font-cinzel)', fontSize: '1.4rem', color: '#fff', margin: '0 0 6px 0' }}>
+                  Torn City Forum HTML &amp; CSS Studio
                 </h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--ghost)', margin: '4px 0 0 0' }}>
-                  Instantly generated BBCode formatted thread with active queue slot statuses, pricing, and links to COVEN.
+                <p style={{ fontSize: '0.8125rem', color: 'var(--ghost)', margin: 0, maxWidth: '680px', lineHeight: 1.5 }}>
+                  Generates sanitized raw HTML with inline CSS strictly matching Torn City&apos;s 600px post limit and 600&times;100 signature constraints. Works directly via Torn&apos;s <strong>Tools &rarr; Source code (&lt;&gt;)</strong> editor.
                 </p>
               </div>
 
-              <button
-                onClick={handleCopyBBCode}
-                className="renaissance-btn-gold"
-                style={{ padding: '10px 16px', fontSize: '0.75rem', minHeight: '44px' }}
-              >
-                {bbcodeCopied ? <Check size={14} weight="bold" /> : <Copy size={14} weight="bold" />}
-                {bbcodeCopied ? 'Copied to Clipboard!' : 'Copy Entire BBCode'}
-              </button>
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <button
+                  onClick={handleCopyTornHtml}
+                  className="renaissance-btn-gold"
+                  style={{ padding: '10px 18px', fontSize: '0.75rem', minHeight: '44px' }}
+                >
+                  {htmlCopied ? <Check size={14} weight="bold" /> : <Copy size={14} weight="bold" />}
+                  {htmlCopied ? 'HTML Copied to Clipboard!' : 'Copy Raw HTML for Torn'}
+                </button>
+              </div>
             </div>
 
-            <textarea
-              readOnly
-              rows={16}
-              value={generateForumShopBBCode(studio, AHMAD_SOVEREIGN_ARTIST, portfolioArtworks[0])}
-              style={{
-                width: '100%',
-                background: 'rgba(10, 12, 11, 0.9)',
-                border: '1px solid rgba(244, 241, 234, 0.1)',
-                borderRadius: '6px',
-                padding: '16px',
-                color: 'var(--ghost)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                lineHeight: 1.6,
-                resize: 'vertical'
-              }}
-            />
+            {/* Template Selector Pills & View Mode */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              padding: '12px 16px',
+              background: 'rgba(244, 241, 234, 0.02)',
+              border: '1px solid rgba(244, 241, 234, 0.08)',
+              borderRadius: '6px',
+              marginBottom: '20px'
+            }}>
+              {/* Templates */}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)', alignSelf: 'center', marginRight: '4px' }}>
+                  TEMPLATE:
+                </span>
+                <button
+                  onClick={() => setHtmlTemplate('thread')}
+                  className={`renaissance-pill ${htmlTemplate === 'thread' ? 'active' : ''}`}
+                  style={{ fontSize: '0.6875rem', padding: '6px 12px' }}
+                >
+                  1. Forum Shop Thread (600px)
+                </button>
+                <button
+                  onClick={() => setHtmlTemplate('signature')}
+                  className={`renaissance-pill ${htmlTemplate === 'signature' ? 'active' : ''}`}
+                  style={{ fontSize: '0.6875rem', padding: '6px 12px' }}
+                >
+                  2. Forum Signature (600&times;100)
+                </button>
+                <button
+                  onClick={() => setHtmlTemplate('vouch')}
+                  className={`renaissance-pill ${htmlTemplate === 'vouch' ? 'active' : ''}`}
+                  style={{ fontSize: '0.6875rem', padding: '6px 12px' }}
+                >
+                  3. Client Vouch Slip (600px)
+                </button>
+              </div>
+
+              {/* View Toggle */}
+              <div style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.4)', padding: '4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <button
+                  onClick={() => setHtmlViewMode('preview')}
+                  style={{
+                    background: htmlViewMode === 'preview' ? 'var(--antique-gold)' : 'transparent',
+                    color: htmlViewMode === 'preview' ? '#000' : 'var(--ghost)',
+                    border: 'none',
+                    borderRadius: '3px',
+                    padding: '6px 12px',
+                    fontSize: '0.6875rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Eye size={12} weight="bold" /> Live 600px Preview
+                </button>
+                <button
+                  onClick={() => setHtmlViewMode('code')}
+                  style={{
+                    background: htmlViewMode === 'code' ? 'var(--antique-gold)' : 'transparent',
+                    color: htmlViewMode === 'code' ? '#000' : 'var(--ghost)',
+                    border: 'none',
+                    borderRadius: '3px',
+                    padding: '6px 12px',
+                    fontSize: '0.6875rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <TerminalWindow size={12} weight="bold" /> Raw HTML Code
+                </button>
+              </div>
+            </div>
+
+            {/* Step-by-Step Instructions Banner */}
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.05)',
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              borderRadius: '6px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: '#10b981', fontWeight: 700, textTransform: 'uppercase' }}>
+                How to Paste on Torn:
+              </div>
+              <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--ghost)' }}>
+                <span><strong>1.</strong> Click <em>Copy Raw HTML</em></span>
+                <span style={{ color: 'rgba(255,255,255,0.2)' }}>&rarr;</span>
+                <span><strong>2.</strong> Go to Torn Forums editor</span>
+                <span style={{ color: 'rgba(255,255,255,0.2)' }}>&rarr;</span>
+                <span><strong>3.</strong> Click <em>Tools &gt; Source code (&lt;&gt;)</em></span>
+                <span style={{ color: 'rgba(255,255,255,0.2)' }}>&rarr;</span>
+                <span><strong>4.</strong> Paste &amp; click <em>Save</em></span>
+              </div>
+            </div>
+
+            {/* Display Area: Code or Live Preview */}
+            {htmlViewMode === 'code' ? (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: 'var(--antique-gold)' }}>
+                    RAW HTML WITH INLINE CSS ({getActiveTornHtml().length} characters)
+                  </span>
+                  <span style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)' }}>
+                    Click inside to select all
+                  </span>
+                </div>
+                <textarea
+                  readOnly
+                  rows={18}
+                  value={getActiveTornHtml()}
+                  onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(10, 12, 11, 0.95)',
+                    border: '1px solid rgba(244, 241, 234, 0.1)',
+                    borderRadius: '6px',
+                    padding: '16px',
+                    color: '#e5e7eb',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.75rem',
+                    lineHeight: 1.6,
+                    resize: 'vertical',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                    SIMULATED TORN FORUM CONTAINER (MAX WIDTH: 600px)
+                  </span>
+                  <span style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)' }}>
+                    Pixel-accurate font, spacing &amp; inline colors
+                  </span>
+                </div>
+
+                {/* Outer frame simulating Torn City forum post body */}
+                <div style={{
+                  background: '#040605',
+                  border: '1px dashed rgba(212, 175, 55, 0.3)',
+                  borderRadius: '8px',
+                  padding: '24px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  overflowX: 'auto'
+                }}>
+                  <div
+                    style={{ width: '100%', maxWidth: '600px' }}
+                    dangerouslySetInnerHTML={{ __html: getActiveTornHtml() }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 

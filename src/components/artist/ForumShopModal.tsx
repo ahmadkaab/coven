@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Artist, Artwork, Review } from '../../types';
-import { type ArtistStudioConfig, generateForumShopBBCode } from '../../services/studioService';
+import type { ArtistStudioConfig } from '../../services/studioService';
+import { generateTornForumShopHtml, generateTornForumSignatureHtml } from '../../utils/tornHtml';
 import { X, Copy, Check, TerminalWindow, Eye, Info, Sparkle } from '@phosphor-icons/react';
 
 interface ForumShopModalProps {
@@ -18,20 +19,22 @@ export function ForumShopModal({
   reviews = [],
   onClose,
 }: ForumShopModalProps) {
-  const [activeTab, setActiveTab] = useState<'bbcode' | 'preview'>('bbcode');
+  const [template, setTemplate] = useState<'thread' | 'signature'>('thread');
+  const [activeTab, setActiveTab] = useState<'html' | 'preview'>('preview');
   const [copied, setCopied] = useState(false);
 
-  const bbcode = generateForumShopBBCode(studio, artist, featuredArt, reviews);
+  const rawHtml = template === 'signature'
+    ? generateTornForumSignatureHtml(artist, studio)
+    : generateTornForumShopHtml(studio, artist, featuredArt, reviews);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(bbcode);
+      await navigator.clipboard.writeText(rawHtml);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      // Fallback
       const textarea = document.createElement('textarea');
-      textarea.value = bbcode;
+      textarea.value = rawHtml;
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand('copy');
@@ -62,13 +65,15 @@ export function ForumShopModal({
         style={{
           background: 'var(--pit)',
           border: '1px solid var(--hull)',
-          borderTop: '3px solid var(--red)',
+          borderTop: '3px solid var(--antique-gold)',
           width: '100%',
-          maxWidth: '840px',
-          maxHeight: '90vh',
+          maxWidth: '860px',
+          maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9)',
+          borderRadius: '6px',
+          overflow: 'hidden'
         }}
       >
         {/* Modal Header */}
@@ -87,7 +92,7 @@ export function ForumShopModal({
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.625rem',
-                color: 'var(--red)',
+                color: 'var(--antique-gold)',
                 letterSpacing: '0.15em',
                 textTransform: 'uppercase',
                 display: 'flex',
@@ -96,7 +101,7 @@ export function ForumShopModal({
               }}
             >
               <Sparkle size={10} weight="fill" />
-              TORN FORUM SHOP ENGINE
+              TORN RAW HTML &amp; INLINE CSS ENGINE
             </div>
             <h2
               style={{
@@ -108,7 +113,7 @@ export function ForumShopModal({
                 margin: '2px 0 0 0',
               }}
             >
-              OFFICIAL FORUM SHOP BBCODE THREAD
+              TORN FORUM SHOP THREAD (600px)
             </h2>
           </div>
 
@@ -131,7 +136,7 @@ export function ForumShopModal({
           </button>
         </div>
 
-        {/* Sub-bar with description & tabs */}
+        {/* Sub-bar with template picker & mode tabs */}
         <div
           style={{
             display: 'flex',
@@ -144,41 +149,31 @@ export function ForumShopModal({
             gap: 'var(--sp-3)',
           }}
         >
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.6875rem',
-              color: 'var(--ghost)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <Info size={14} color="var(--red)" weight="bold" />
-            <span>Formatted for Torn City Graphic Forums (Forum ID: 23)</span>
+          {/* Template pills */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
+              FORMAT:
+            </span>
+            <button
+              type="button"
+              onClick={() => setTemplate('thread')}
+              className={`renaissance-pill ${template === 'thread' ? 'active' : ''}`}
+              style={{ fontSize: '0.6875rem', padding: '4px 10px' }}
+            >
+              Forum Thread (600px)
+            </button>
+            <button
+              type="button"
+              onClick={() => setTemplate('signature')}
+              className={`renaissance-pill ${template === 'signature' ? 'active' : ''}`}
+              style={{ fontSize: '0.6875rem', padding: '4px 10px' }}
+            >
+              Signature (600×100)
+            </button>
           </div>
 
           {/* Toggle source vs visual preview */}
           <div style={{ display: 'flex', gap: '1px', background: 'var(--hull)' }}>
-            <button
-              type="button"
-              onClick={() => setActiveTab('bbcode')}
-              style={{
-                padding: '4px 12px',
-                border: 'none',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.6875rem',
-                cursor: 'pointer',
-                background: activeTab === 'bbcode' ? 'var(--red)' : 'var(--plate)',
-                color: activeTab === 'bbcode' ? '#fff' : 'var(--ghost)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}
-            >
-              <TerminalWindow size={12} weight="bold" />
-              BBCODE SOURCE
-            </button>
             <button
               type="button"
               onClick={() => setActiveTab('preview')}
@@ -188,22 +183,59 @@ export function ForumShopModal({
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.6875rem',
                 cursor: 'pointer',
-                background: activeTab === 'preview' ? 'var(--red)' : 'var(--plate)',
-                color: activeTab === 'preview' ? '#fff' : 'var(--ghost)',
+                background: activeTab === 'preview' ? 'var(--antique-gold)' : 'var(--plate)',
+                color: activeTab === 'preview' ? '#000' : 'var(--ghost)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
+                fontWeight: 600,
               }}
             >
               <Eye size={12} weight="bold" />
-              FORUM PREVIEW
+              600px PREVIEW
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('html')}
+              style={{
+                padding: '4px 12px',
+                border: 'none',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.6875rem',
+                cursor: 'pointer',
+                background: activeTab === 'html' ? 'var(--antique-gold)' : 'var(--plate)',
+                color: activeTab === 'html' ? '#000' : 'var(--ghost)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontWeight: 600,
+              }}
+            >
+              <TerminalWindow size={12} weight="bold" />
+              RAW HTML CODE
             </button>
           </div>
         </div>
 
+        {/* Step Guide Banner */}
+        <div style={{
+          padding: '8px 24px',
+          background: 'rgba(16, 185, 129, 0.06)',
+          borderBottom: '1px solid rgba(16, 185, 129, 0.2)',
+          fontSize: '0.6875rem',
+          color: 'var(--ghost)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontFamily: 'var(--font-mono)'
+        }}>
+          <Info size={14} color="#10b981" weight="bold" />
+          <span>In Torn Forum Editor: Click <strong>Tools &rarr; Source code (&lt;&gt;)</strong>, paste this raw HTML, and click <strong>Ok</strong>.</span>
+        </div>
+
         {/* Content Body */}
         <div style={{ padding: 'var(--sp-6)', overflowY: 'auto', flex: 1 }}>
-          {activeTab === 'bbcode' ? (
+          {activeTab === 'html' ? (
             <div>
               <div
                 style={{
@@ -213,17 +245,17 @@ export function ForumShopModal({
                   marginBottom: 'var(--sp-2)',
                 }}
               >
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)' }}>
-                  {bbcode.split('\n').length} LINES • {bbcode.length} CHARACTERS
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--antique-gold)' }}>
+                  {rawHtml.length} CHARACTERS &bull; SANITIZED INLINE CSS
                 </div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--ghost)' }}>
-                  Includes: Header, Pricing Table, Live Queue, Showcase & Terms
+                  Click inside to select all
                 </div>
               </div>
 
               <textarea
                 readOnly
-                value={bbcode}
+                value={rawHtml}
                 rows={16}
                 style={{
                   width: '100%',
@@ -241,115 +273,23 @@ export function ForumShopModal({
               />
             </div>
           ) : (
-            /* Visual preview mimicking Torn forum thread */
+            /* Visual preview mimicking Torn forum thread with strict 600px width */
             <div
               style={{
-                background: '#1a1a1a',
-                border: '1px solid #333',
-                padding: 'var(--sp-6)',
-                color: '#ddd',
-                fontFamily: 'Segoe UI, Tahoma, sans-serif',
-                textAlign: 'center',
-                borderRadius: '4px',
+                background: '#040605',
+                border: '1px dashed rgba(212, 175, 55, 0.3)',
+                padding: '24px 16px',
+                borderRadius: '6px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                overflowX: 'auto'
               }}
             >
-              <div style={{ color: '#E61919', fontWeight: 'bold', fontSize: '1.4rem', letterSpacing: '0.05em' }}>
-                ◈ ═══════ {studio.studioName} ═══════ ◈
-              </div>
-              <div style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '0.95rem', marginTop: '6px' }}>
-                {studio.tagline}
-              </div>
-              <div style={{ color: '#888888', fontSize: '0.75rem', marginTop: '2px' }}>
-                AUTHENTICATED CREATIVE STUDIO • COVEN INDEPENDENT ART MARKET
-              </div>
-
               <div
-                style={{
-                  display: 'inline-block',
-                  background: '#222',
-                  border: '1px solid #444',
-                  padding: '8px 16px',
-                  margin: '16px auto',
-                  fontSize: '0.8125rem',
-                }}
-              >
-                <strong>CREATOR:</strong> {artist.username} &nbsp;|&nbsp;
-                <strong>STATUS:</strong>{' '}
-                <span style={{ color: studio.status === 'open' ? '#00FF64' : '#E61919' }}>
-                  {studio.status.toUpperCase()}
-                </span>{' '}
-                &nbsp;|&nbsp;
-                <strong>SLA:</strong> {studio.turnaroundDays} DAYS
-              </div>
-
-              {/* Pricing Box */}
-              <div
-                style={{
-                  background: '#242424',
-                  border: '1px solid #444',
-                  padding: '12px 16px',
-                  margin: '16px 0',
-                  textAlign: 'left',
-                }}
-              >
-                <div style={{ color: '#E61919', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
-                  ─── PRICING GUIDE (TORN CASH & DONATOR PACKS) ───
-                </div>
-                <div style={{ fontSize: '0.8125rem', lineHeight: 1.8, color: '#ccc' }}>
-                  <div>• <strong>1:1 PROFILE AVATARS:</strong> $5,000,000 – $8,000,000 (0.2 – 0.3 DP)</div>
-                  <div>• <strong>FORUM SIGNATURES (600×200):</strong> $8,000,000 – $14,000,000 (0.3 – 0.6 DP)</div>
-                  <div>• <strong>ANIMATED SIGNATURES (60 FPS):</strong> $16,000,000 – $22,000,000 (0.7 – 0.9 DP)</div>
-                  <div>• <strong>FACTION WAR BANNERS & CRESTS:</strong> $28,000,000 – $40,000,000 (1.1 – 1.6 DP)</div>
-                  <div>• <strong>COMPLETE PROFILE BBCode SUITES:</strong> $45,000,000 – $75,000,000 (1.8 – 3.0 DP)</div>
-                </div>
-              </div>
-
-              {/* Queue Status Box */}
-              <div
-                style={{
-                  background: '#242424',
-                  border: '1px solid #444',
-                  padding: '12px 16px',
-                  margin: '16px 0',
-                  textAlign: 'left',
-                }}
-              >
-                <div style={{ color: '#E61919', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
-                  ─── LIVE COMMISSION QUEUE ───
-                </div>
-                <div style={{ fontSize: '0.8125rem', lineHeight: 1.8 }}>
-                  {studio.queueSlots.map((slot) => (
-                    <div key={slot.id}>
-                      <strong>SLOT {slot.slotNumber}:</strong>{' '}
-                      {slot.status === 'open' ? (
-                        <span style={{ color: '#00FF64' }}>● OPEN FOR COMMISSION</span>
-                      ) : (
-                        <span style={{ color: '#E61919' }}>
-                          ▲ {slot.status === 'review' ? 'IN REVIEW' : 'IN PROGRESS'} [{slot.progressPct ?? 50}%] — {slot.projectTitle || 'Custom Graphic'} (Client: {slot.clientUsername || 'Anonymous'})
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {featuredArt && (
-                <div style={{ margin: '16px 0' }}>
-                  <div style={{ color: '#E61919', fontWeight: 'bold', marginBottom: '6px' }}>
-                    ─── FEATURED MASTERPIECE: {featuredArt.title} ───
-                  </div>
-                  <img
-                    src={featuredArt.image_url}
-                    alt={featuredArt.title}
-                    style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', border: '1px solid #444' }}
-                  />
-                </div>
-              )}
-
-              {/* Terms */}
-              <div style={{ fontStyle: 'italic', fontSize: '0.75rem', color: '#aaa', marginTop: '16px' }}>
-                "{studio.termsOfService}"
-              </div>
+                style={{ width: '100%', maxWidth: '600px' }}
+                dangerouslySetInnerHTML={{ __html: rawHtml }}
+              />
             </div>
           )}
         </div>
@@ -371,10 +311,10 @@ export function ForumShopModal({
             {copied ? (
               <span style={{ color: 'var(--term-green)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Check size={14} weight="bold" />
-                COPIED TO CLIPBOARD! Ready to paste into Torn thread.
+                COPIED TO CLIPBOARD! Ready to paste into Torn Source Code editor.
               </span>
             ) : (
-              '1-Click Export for Torn City Graphic & Art Forum threads'
+              '1-Click Raw HTML Export for Torn City Forums & Signatures'
             )}
           </div>
 
@@ -389,18 +329,20 @@ export function ForumShopModal({
             </button>
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className="renaissance-btn-gold"
               onClick={handleCopy}
               style={{
-                borderRadius: 0,
+                borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
                 padding: '8px 18px',
+                fontSize: '0.75rem',
+                minHeight: '38px',
               }}
             >
               {copied ? <Check size={14} weight="bold" /> : <Copy size={14} weight="bold" />}
-              {copied ? 'THREAD COPIED' : 'COPY FULL FORUM SHOP BBCODE'}
+              {copied ? 'HTML COPIED' : 'COPY RAW TORN HTML'}
             </button>
           </div>
         </div>

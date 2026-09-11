@@ -25,6 +25,7 @@ import { CommissionQueueBoard } from '../components/artist/CommissionQueueBoard'
 import { StudioSpotlight } from '../components/artist/StudioSpotlight';
 import { ForumShopModal } from '../components/artist/ForumShopModal';
 import { generateArtistBBCode } from '../utils/bbcode';
+import { generateArtistTornHtml } from '../utils/tornHtml';
 import { timeAgo, tierLabel } from '../utils/format';
 
 /* ── Skeleton ─────────────────────────────────────────────────── */
@@ -468,12 +469,13 @@ export function ArtistProfile() {
         />
       )}
 
-      {/* Torn Quick BBCode Exporter Modal */}
+      {/* Torn Quick Raw HTML / BBCode Exporter Modal */}
       {showBBCode && (
         <BBCodeModal
-          title={`Artist BBCode: ${artist.username}`}
-          subtitle="Ready to paste into Torn City Graphic & Art forums or trade threads."
+          title={`Artist Dossier: ${artist.username}`}
+          subtitle="Ready to paste into Torn City Graphic & Art forums or trade threads (600px)"
           bbcode={generateArtistBBCode(artist, window.location.href)}
+          rawHtml={generateArtistTornHtml(artist, window.location.href)}
           onClose={() => setShowBBCode(false)}
         />
       )}

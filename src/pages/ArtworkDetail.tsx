@@ -24,6 +24,7 @@ import { ProvenanceCertificateModal } from '../components/artwork/ProvenanceCert
 import { VaultUnlockModal } from '../components/artwork/VaultUnlockModal';
 import { useVaultClearance, useProvenance, useWatermarkSettings } from '../hooks/useVault';
 import { generateArtworkBBCode } from '../utils/bbcode';
+import { generateArtworkTornHtml } from '../utils/tornHtml';
 import { formatTornCash, timeAgo } from '../utils/format';
 import type { Artwork } from '../types';
 
@@ -940,9 +941,9 @@ export function ArtworkDetail() {
                 className="btn btn-ghost btn-sm"
                 style={{ flex: 1, justifyContent: 'center', gap: '6px' }}
                 onClick={() => setShowBBCode(true)}
-                title="Export formatted BBCode for Torn City forums"
+                title="Export formatted Raw HTML / BBCode for Torn City forums"
               >
-                <TerminalWindow size={12} weight="bold" />BBCode
+                <TerminalWindow size={12} weight="bold" />Torn HTML
               </button>
               <button
                 className="btn btn-ghost btn-sm"
@@ -1045,12 +1046,13 @@ export function ArtworkDetail() {
           />
         )}
 
-        {/* Torn City Forum BBCode Modal */}
+        {/* Torn City Forum Raw HTML / BBCode Modal */}
         {showBBCode && (
           <BBCodeModal
-            title={`FORUM BBCODE // ${merged.title.toUpperCase()}`}
-            subtitle="Formatted for Torn City Graphic & Art Design forums and profile signatures"
+            title={`FORUM CARD // ${merged.title.toUpperCase()}`}
+            subtitle="Formatted for Torn City Graphic & Art Design forums (600px)"
             bbcode={generateArtworkBBCode(merged)}
+            rawHtml={generateArtworkTornHtml(merged)}
             onClose={() => setShowBBCode(false)}
           />
         )}

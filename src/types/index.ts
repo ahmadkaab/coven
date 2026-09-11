@@ -164,7 +164,7 @@ export interface Review {
   id: string;
   artist_id: string;
   reviewer_user_id: string;
-  reviewer?: { username: string; avatar_url?: string };
+  reviewer?: { username: string; avatar_url?: string; torn_id?: string };
   rating: number;             // 1–5
   body?: string;
   transaction_id?: string;
