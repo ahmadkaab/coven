@@ -386,25 +386,15 @@
      In production, these would be fetched from coven.torn.city/api
      ================================================================ */
   const DEMO_ARTISTS = {
-    '4427813': {
-      name: 'bell_queen',
-      tier: 'RISING',
-      title: '◆ SHADOW ARTISAN ◆',
-      frame: 'crimson-wire',
-      totalSales: 34,
-      avgRating: 4.9,
-      verified: true,
-      covenUrl: '/artists/62f6b66f-0e4c-450b-881a-51a29664b2f0',
-    },
-    '2190421': {
-      name: 'SINTEX',
-      tier: 'MASTER',
-      title: '◆ ARCHITECT OF RUIN ◆',
-      frame: 'obsidian-lattice',
-      totalSales: 127,
+    '4295891': {
+      name: 'ahmad_kaab',
+      tier: 'LEGEND',
+      title: '◆ SOVEREIGN ARTISAN ◆',
+      frame: 'gold-renaissance',
+      totalSales: 128,
       avgRating: 5.0,
       verified: true,
-      covenUrl: '/artists/a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      covenUrl: '/artists/artist-ahmad-01',
     },
   };
 

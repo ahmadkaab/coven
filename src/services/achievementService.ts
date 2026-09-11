@@ -12,10 +12,10 @@ import type {
 } from '../types/achievement';
 import { dispatchNotification } from './notificationService';
 
-const ACHIEVEMENTS_KEY = 'coven_achievements_v1';
-const TITLES_KEY = 'coven_titles_v1';
-const FRAMES_KEY = 'coven_frames_v1';
-const PROGRESSION_KEY = 'coven_progression_v1';
+const ACHIEVEMENTS_KEY = 'coven_achievements_v2';
+const TITLES_KEY = 'coven_titles_v2';
+const FRAMES_KEY = 'coven_frames_v2';
+const PROGRESSION_KEY = 'coven_progression_v2';
 
 /* ── DEFAULT TITLES ─────────────────────────────────────────── */
 const SEED_TITLES: SyndicateTitle[] = [
@@ -27,7 +27,7 @@ const SEED_TITLES: SyndicateTitle[] = [
     rarity: 'STANDARD',
     glowColor: '#f59e0b',
     gradient: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
-    unlocked: true,
+    unlocked: false,
     equipped: false,
     sourceAchievementId: 'trade_first_swap',
     bonusPerk: '-0.5% Escrow Transaction Fee',
@@ -40,7 +40,7 @@ const SEED_TITLES: SyndicateTitle[] = [
     rarity: 'COVERT',
     glowColor: '#06b6d4',
     gradient: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
-    unlocked: true,
+    unlocked: false,
     equipped: false,
     sourceAchievementId: 'patron_grand_curator',
     bonusPerk: '+5% Marketplace Reputation',
@@ -53,7 +53,7 @@ const SEED_TITLES: SyndicateTitle[] = [
     rarity: 'MYTHIC',
     glowColor: '#10b981',
     gradient: 'linear-gradient(90deg, #10b981, #fbbf24)',
-    unlocked: true,
+    unlocked: false,
     equipped: false,
     sourceAchievementId: 'patron_titan',
     bonusPerk: 'Priority Commission Queue Access',
@@ -64,10 +64,10 @@ const SEED_TITLES: SyndicateTitle[] = [
     tag: '[ARCHON OF TORN]',
     lore: 'The absolute pinnacle of underworld prestige. Sovereign patron of fine arts and master collector.',
     rarity: 'ARCHON',
-    glowColor: '#e61919',
-    gradient: 'linear-gradient(90deg, #e61919, #fbbf24, #f43f5e)',
-    unlocked: true,
-    equipped: true,
+    glowColor: '#e11d48',
+    gradient: 'linear-gradient(90deg, #e11d48, #fbbf24, #f43f5e)',
+    unlocked: false,
+    equipped: false,
     sourceAchievementId: 'archon_supreme',
     bonusPerk: '-2.0% Escrow Fee Rebate & Mythic Corona Aura',
   },
@@ -78,12 +78,12 @@ const SEED_FRAMES: AvatarFrame[] = [
   {
     id: 'frame_operative',
     name: 'Standard Operative',
-    description: 'Clean dark carbon-fiber chamfered border with subdued matte corner tabs.',
+    description: 'Clean dark titanium chamfered border with subdued matte corner tabs.',
     rarity: 'STANDARD',
     glowColor: '#52525b',
     cssClass: 'frame-operative',
     unlocked: true,
-    equipped: false,
+    equipped: true,
     sourceAchievementId: 'trade_first_swap',
   },
   {
@@ -93,7 +93,7 @@ const SEED_FRAMES: AvatarFrame[] = [
     rarity: 'COVERT',
     glowColor: '#06b6d4',
     cssClass: 'frame-cyber-pulse',
-    unlocked: true,
+    unlocked: false,
     equipped: false,
     sourceAchievementId: 'secret_midnight_syndicate',
   },
@@ -104,7 +104,7 @@ const SEED_FRAMES: AvatarFrame[] = [
     rarity: 'MYTHIC',
     glowColor: '#fbbf24',
     cssClass: 'frame-monarch-gold',
-    unlocked: true,
+    unlocked: false,
     equipped: false,
     sourceAchievementId: 'patron_titan',
   },
@@ -113,10 +113,10 @@ const SEED_FRAMES: AvatarFrame[] = [
     name: 'Archon Void Corona',
     description: 'Pulsing mythic underworld corona with shifting crimson, gold, and violet energy field.',
     rarity: 'ARCHON',
-    glowColor: '#e61919',
+    glowColor: '#e11d48',
     cssClass: 'frame-archon-void',
-    unlocked: true,
-    equipped: true,
+    unlocked: false,
+    equipped: false,
     sourceAchievementId: 'archon_supreme',
   },
 ];
@@ -132,11 +132,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'BLACK_MARKET',
     rarity: 'STANDARD',
     icon: 'ArrowsLeftRight',
-    progress: 1,
+    progress: 0,
     maxProgress: 1,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 5 * 86400_000).toISOString(),
-    claimed: true,
+    unlocked: false,
+    claimed: false,
     reward: { type: 'TITLE', value: 'title_broker', label: 'Title: [BLACK MARKET BROKER]' },
     trackTag: '[P2P SWAP]',
   },
@@ -147,11 +146,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'BLACK_MARKET',
     rarity: 'COVERT',
     icon: 'Coins',
-    progress: 25000000,
+    progress: 0,
     maxProgress: 15000000,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 2 * 86400_000).toISOString(),
-    claimed: false, // Ready to claim!
+    unlocked: false,
+    claimed: false,
     reward: { type: 'FEE_DISCOUNT', value: 0.5, label: '+0.5% Permanent Fee Rebate' },
     trackTag: '[CASH ESCROW]',
   },
@@ -162,7 +160,7 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'BLACK_MARKET',
     rarity: 'CLASSIFIED',
     icon: 'Scales',
-    progress: 2,
+    progress: 0,
     maxProgress: 3,
     unlocked: false,
     claimed: false,
@@ -178,11 +176,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'SYNDICATE_PATRON',
     rarity: 'MYTHIC',
     icon: 'Bank',
-    progress: 74500000,
+    progress: 0,
     maxProgress: 50000000,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 14 * 86400_000).toISOString(),
-    claimed: true,
+    unlocked: false,
+    claimed: false,
     reward: { type: 'AVATAR_FRAME', value: 'frame_monarch_gold', label: 'Frame: Monarch High-Roller' },
     trackTag: '[INVESTOR]',
   },
@@ -193,11 +190,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'SYNDICATE_PATRON',
     rarity: 'STANDARD',
     icon: 'Broadcast',
-    progress: 3,
+    progress: 0,
     maxProgress: 3,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 7 * 86400_000).toISOString(),
-    claimed: true,
+    unlocked: false,
+    claimed: false,
     reward: { type: 'EXP', value: 350, label: '+350 Syndicate EXP' },
     trackTag: '[RADAR WIRE]',
   },
@@ -208,11 +204,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'SYNDICATE_PATRON',
     rarity: 'COVERT',
     icon: 'Palette',
-    progress: 6,
+    progress: 0,
     maxProgress: 5,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 4 * 86400_000).toISOString(),
-    claimed: false, // Ready to claim!
+    unlocked: false,
+    claimed: false,
     reward: { type: 'FEE_DISCOUNT', value: 0.5, label: '+0.5% Permanent Fee Rebate' },
     trackTag: '[TROPHY VAULT]',
   },
@@ -225,11 +220,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'MARKET_TYCOON',
     rarity: 'COVERT',
     icon: 'Gavel',
-    progress: 1,
+    progress: 0,
     maxProgress: 1,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 10 * 86400_000).toISOString(),
-    claimed: true,
+    unlocked: false,
+    claimed: false,
     reward: { type: 'EXP', value: 450, label: '+450 Syndicate EXP' },
     trackTag: '[AUCTIONS]',
   },
@@ -240,11 +234,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'MARKET_TYCOON',
     rarity: 'CLASSIFIED',
     icon: 'EyeSlash',
-    progress: 1,
+    progress: 0,
     maxProgress: 1,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 1 * 86400_000).toISOString(),
-    claimed: false, // Ready to claim!
+    unlocked: false,
+    claimed: false,
     secret: true,
     hint: 'Operate within covert syndicate channels under the cover of digital blackout.',
     reward: { type: 'AVATAR_FRAME', value: 'frame_cyber_pulse', label: 'Frame: Cyber Neon Circuit' },
@@ -257,11 +250,10 @@ const SEED_ACHIEVEMENTS: Achievement[] = [
     category: 'MARKET_TYCOON',
     rarity: 'ARCHON',
     icon: 'Sparkle',
-    progress: 10,
+    progress: 0,
     maxProgress: 10,
-    unlocked: true,
-    unlockedAt: new Date(Date.now() - 1 * 86400_000).toISOString(),
-    claimed: true,
+    unlocked: false,
+    claimed: false,
     reward: { type: 'TITLE', value: 'title_archon', label: 'Title: [ARCHON OF TORN] & Archon Corona Frame' },
     trackTag: '[PRESTIGE MASTERY]',
   },
@@ -319,17 +311,17 @@ export function getSyndicateProgression(): SyndicateProgression {
   const feeRebatePercent = Math.min(3.0, Number(totalRebate.toFixed(1)));
 
   // Calculate Level & EXP based on unlocked achievements
-  const baseExp = 7850;
-  const level = Math.min(20, Math.floor(baseExp / 750) + 1); // Level 11
-  const currentExp = baseExp % 1000;
-  const nextLevelExp = 1000;
+  const baseExp = unlockedCount * 500;
+  const level = Math.min(20, Math.floor(baseExp / 500) + 1);
+  const currentExp = baseExp % 500;
+  const nextLevelExp = 500;
 
   return {
     level,
-    tierTitle: level >= 15 ? 'Archon Sovereign' : level >= 10 ? 'Syndicate Kingpin' : 'Operative',
+    tierTitle: level >= 15 ? 'Archon Sovereign' : level >= 10 ? 'Syndicate Kingpin' : level >= 5 ? 'Curator' : 'Operative',
     currentExp,
     nextLevelExp,
-    totalReputation: 14200 + (unlockedCount * 350),
+    totalReputation: 100 + (unlockedCount * 350),
     feeRebatePercent,
     equippedTitle,
     equippedFrame,

@@ -20,6 +20,9 @@ import { AchievementsHub }   from './pages/AchievementsHub';
 import { UserScriptInstall } from './pages/UserScriptInstall';
 import { PrivacyTerms }      from './pages/PrivacyTerms';
 import { AboutFaq }          from './pages/AboutFaq';
+import { Wallet }            from './pages/Wallet';
+import { AdminPanel }        from './pages/AdminPanel';
+import { ArtistStudio }       from './pages/ArtistStudio';
 import { useAuthStore }      from './store/authStore';
 
 import { ToastProvider } from './context/ToastContext';
@@ -43,6 +46,9 @@ export default function App() {
         <Route path="/artist/:id"     element={<ArtistProfile />} />
         <Route path="/artwork/:id"    element={<ArtworkDetail />} />
         <Route path="/auctions"       element={<Browse />} />
+        <Route path="/wallet"         element={<Wallet />} />
+        <Route path="/escrow"         element={<Wallet />} />
+        <Route path="/treasury"       element={<Wallet />} />
         <Route path="/trade"          element={<TradeDesk />} />
         <Route path="/trade/:id"      element={<TradeDesk />} />
         <Route path="/trade/new"      element={<TradeDesk />} />
@@ -58,7 +64,10 @@ export default function App() {
         <Route path="/privacy"        element={<PrivacyTerms defaultTab="privacy" />} />
         <Route path="/terms"          element={<PrivacyTerms defaultTab="terms" />} />
         <Route path="/disclosure"     element={<PrivacyTerms defaultTab="disclosure" />} />
-        <Route path="/api-disclosure" element={<PrivacyTerms defaultTab="disclosure" />} />
+        <Route path="/admin"          element={<AdminPanel />} />
+        <Route path="/executive"      element={<AdminPanel />} />
+        <Route path="/studio"         element={<ArtistStudio />} />
+        <Route path="/artist-studio"  element={<ArtistStudio />} />
         <Route path="/apply"          element={<ProtectedRoute><RegisterArtist /></ProtectedRoute>} />
 
         {/* Protected (require auth) */}

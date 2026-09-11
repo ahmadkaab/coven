@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   PaintBrush, ShieldCheck, CurrencyCircleDollar,
-  Star, CheckCircle, CaretRight
+  Star, CheckCircle, CaretRight, Crown, Sparkle, Lightning
 } from '@phosphor-icons/react';
 import { useArtists } from '../hooks/useData';
-import { CommissionModal } from '../components/commission/CommissionModal';
+import { CommissionAhmadModal } from '../components/commission/CommissionAhmadModal';
+import { AHMAD_SOVEREIGN_ARTIST } from '../services/artistService';
 import { tierLabel } from '../utils/format';
 import type { Artist } from '../types';
 
@@ -23,9 +24,9 @@ const CATEGORIES = [
 export function Commissions() {
   const reduce = useReducedMotion();
   const { data: artistsResult, isLoading } = useArtists();
-  const artists: Artist[] = artistsResult?.data ?? [];
+  const artists: Artist[] = artistsResult?.data ?? [AHMAD_SOVEREIGN_ARTIST];
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [isAhmadModalOpen, setIsAhmadModalOpen] = useState(false);
 
   const filteredArtists = artists.filter((artist: Artist) => {
     if (selectedCategory === 'ALL') return true;
@@ -36,69 +37,81 @@ export function Commissions() {
   });
 
   return (
-    <main className="page-content" style={{ paddingBottom: 'var(--sp-20)' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: 'var(--sp-20)' }}>
 
-      {/* ── HEADER ─────────────────────────────────────────── */}
-      <div style={{ borderBottom: '2px solid var(--red)', background: 'var(--pit)', paddingTop: '24px' }}>
+      {/* ── RENAISSANCE HEADER ───────────────────────────────── */}
+      <div className="renaissance-page-header">
         <div className="container">
-          <div style={{ padding: 'var(--sp-6) 0 var(--sp-8)' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 'var(--sp-2)' }}>
-              [ BESPOKE TORN COMMISSIONS ]
-            </div>
-            <h1 style={{
-              fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-              lineHeight: 0.9, letterSpacing: '-0.04em', textTransform: 'uppercase', color: 'var(--phosphor)',
-            }}>
-              COMMISSION ARTISTS
-            </h1>
-            <p style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ghost)',
-              lineHeight: 1.8, maxWidth: 620, marginTop: 'var(--sp-4)',
-            }}>
-              Directly commission verified Torn creators for faction banners, profile scenes, corporate logos, and high-impact signatures. Zero platform fees — 100% peer-to-peer Torn cash settlement.
-            </p>
+          <div className="renaissance-chapter-tag">
+            <Crown size={13} weight="fill" />
+            Custom Artwork &bull; Direct Commissions
+          </div>
+          <h1 className="renaissance-title">
+            Commission Ahmad [4295891]
+          </h1>
+          <p className="renaissance-subtitle">
+            Order custom artwork directly from Torn City&apos;s verified artist <strong>ahmad_kaab [4295891]</strong>.
+            Faction war banners, 3D character scenes, profile avatars, and forum signatures. Safe escrow protection with zero platform fees.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setIsAhmadModalOpen(true)}
+              className="renaissance-btn-gold"
+              style={{ padding: '10px 24px', fontSize: '0.8125rem' }}
+            >
+              <Sparkle size={14} weight="fill" /> Request Custom Artwork ⚡
+            </button>
+            <Link
+              to="/wallet"
+              className="renaissance-pill"
+              style={{ textDecoration: 'none' }}
+            >
+              Add Escrow Balance &rarr;
+            </Link>
           </div>
         </div>
       </div>
 
       <div className="container" style={{ paddingTop: 'var(--sp-10)' }}>
 
-        {/* ── HOW COMMISSIONS WORK (INDUSTRIAL PROTOCOL) ───── */}
+        {/* ── HOW COMMISSIONS WORK ───── */}
         <div style={{ marginBottom: 'var(--sp-12)' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 'var(--sp-3)' }}>
-            [ WORKFLOW PROTOCOL ]
+            [ HOW IT WORKS • 4 EASY STEPS ]
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1px', background: 'var(--seam)' }}>
+          <div className="grid-responsive-4" style={{ gap: '1px', background: 'var(--seam)' }}>
             {[
               {
                 step: '01',
                 title: 'SUBMIT BRIEF',
-                desc: 'Describe your vision, character references, faction theme, dimensions, and desired budget.',
+                desc: 'Choose your style (banner, scene, avatar, signature) and tell Ahmad your ideas, faction theme, and requirements.',
                 icon: <PaintBrush size={20} color="var(--red-hi)" weight="bold" />
               },
               {
                 step: '02',
-                title: 'CONFIRM SCOPE',
-                desc: 'The artist reviews your request in their COVEN dashboard and accepts your timeline.',
+                title: 'AHMAD ACCEPTS',
+                desc: 'Ahmad reviews your request in his studio queue and confirms your project timeline and details.',
                 icon: <ShieldCheck size={20} color="var(--term-green)" weight="bold" />
               },
               {
                 step: '03',
-                title: 'SEND TORN CASH',
-                desc: 'Transfer payment directly to the artist on Torn. Verified automatically via API log #4810.',
+                title: 'ESCROW HOLD',
+                desc: 'Your credits are safely held in escrow. Ahmad only receives payment when you approve the final delivery.',
                 icon: <CurrencyCircleDollar size={20} color="var(--phosphor)" weight="bold" />
               },
               {
                 step: '04',
-                title: 'DELIVERY & REVIEW',
-                desc: 'Receive your full-res deliverables, approve completion, and leave a verified review.',
+                title: 'RECEIVE ARTWORK',
+                desc: 'Download your high-resolution artwork, approve the final delivery, and leave your verified review.',
                 icon: <CheckCircle size={20} color="var(--term-green)" weight="fill" />
               },
             ].map((p) => (
               <div key={p.step} style={{ background: 'var(--plate)', padding: 'var(--sp-6)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-4)' }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--red-hi)', letterSpacing: '0.1em' }}>
-                    PROTOCOL {p.step}
+                    STEP {p.step}
                   </span>
                   {p.icon}
                 </div>
@@ -116,9 +129,9 @@ export function Commissions() {
         {/* ── CATEGORY FILTER ──────────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
           <div>
-            <h2 className="section-h2" style={{ marginBottom: '2px' }}>SELECT AN ARTIST</h2>
+            <h2 className="section-h2" style={{ marginBottom: '2px' }}>ARTIST SERVICES</h2>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)' }}>
-              FILTER BY SPECIALIZATION
+              FILTER BY ART STYLE
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1px', background: 'var(--seam)', flexWrap: 'wrap' }}>
@@ -134,6 +147,7 @@ export function Commissions() {
                   textTransform: 'uppercase', letterSpacing: '0.1em',
                   color: selectedCategory === cat ? 'var(--phosphor)' : 'var(--ghost)',
                   cursor: 'pointer',
+                  minHeight: '36px',
                 }}
               >
                 {cat}
@@ -144,7 +158,7 @@ export function Commissions() {
 
         {/* ── ARTIST ROSTER GRID ───────────────────────────── */}
         {isLoading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1px', background: 'var(--seam)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '1px', background: 'var(--seam)' }}>
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <div key={n} style={{ background: 'var(--plate)', padding: 'var(--sp-6)', height: 260 }} className="skeleton" />
             ))}
@@ -267,20 +281,20 @@ export function Commissions() {
                 </div>
 
                 {/* Action Buttons */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--seam)', marginTop: 'var(--sp-2)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: 'var(--sp-2)' }}>
                   <Link
                     to={`/artist/${artist.id}`}
                     className="btn btn-ghost"
                     style={{ justifyContent: 'center', fontSize: '0.6875rem', padding: 'var(--sp-3)' }}
                   >
-                    Profile
+                    View Profile
                   </Link>
                   <button
-                    onClick={() => setSelectedArtist(artist)}
-                    className="btn btn-primary"
+                    onClick={() => setIsAhmadModalOpen(true)}
+                    className="renaissance-btn-gold"
                     style={{ justifyContent: 'center', fontSize: '0.6875rem', padding: 'var(--sp-3)' }}
                   >
-                    Commission <CaretRight size={12} weight="bold" />
+                    Commission Ahmad ⚡
                   </button>
                 </div>
               </motion.div>
@@ -289,13 +303,11 @@ export function Commissions() {
         )}
       </div>
 
-      {/* ── Commission Modal ─────────────────────────────── */}
-      {selectedArtist && (
-        <CommissionModal
-          artist={selectedArtist}
-          onClose={() => setSelectedArtist(null)}
-        />
-      )}
+      {/* ── Bespoke Commission Ahmad Modal ───────────────────────── */}
+      <CommissionAhmadModal
+        isOpen={isAhmadModalOpen}
+        onClose={() => setIsAhmadModalOpen(false)}
+      />
     </main>
   );
 }

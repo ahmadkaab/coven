@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { UploadSimple, X, CheckCircle, Warning, IdentificationCard, ShieldCheck, LockKey, Sparkle } from '@phosphor-icons/react';
 import { uploadToCloudinary, type UploadProgress } from '../config/cloudinary';
 import { createArtwork, publishArtwork } from '../services/artworkService';
+import { payFeaturedPinFee, getWallet, FEATURED_PIN_CR } from '../services/walletService';
 import { WatermarkOverlay } from '../components/artwork/WatermarkOverlay';
 import { type WatermarkStyle, WATERMARK_PRESETS } from '../services/vaultService';
 import { useAuth } from '../hooks/useAuth';
@@ -17,7 +18,7 @@ const TAGS_OPTIONS = [
 type Step = 'upload' | 'details' | 'preview' | 'done';
 
 export function ListArtwork() {
-  const { artistId } = useAuth();
+  const { artistId, user } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep]           = useState<Step>('upload');
@@ -39,6 +40,8 @@ export function ListArtwork() {
   const [watermarkStyle, setWatermarkStyle] = useState<WatermarkStyle>('MATRIX_GRID');
   const [watermarkPreview, setWatermarkPreview] = useState<boolean>(true);
   const [isNsfw, setIsNsfw]             = useState<boolean>(false);
+  const [isBlind, setIsBlind]           = useState<boolean>(false);
+  const [isPinned, setIsPinned]         = useState<boolean>(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -91,7 +94,20 @@ export function ListArtwork() {
     if (!artistId || !imageUrl) return;
     setSubmitting(true);
     setError(null);
+
+    // If pinned, check and deduct 10,000 CR (10 Xanax) from user wallet
+    const currentUserId = user ? String(user.player_id) : artistId;
+    if (isPinned) {
+      const paid = payFeaturedPinFee(currentUserId, currentUserId, title.trim());
+      if (!paid) {
+        setError(`Insufficient Escrow Credits for Featured Pin. Required: ${FEATURED_PIN_CR.toLocaleString()} CR (10x Xanax). Please deposit via Treasury.`);
+        setSubmitting(false);
+        return;
+      }
+    }
+
     try {
+      const crAmount = price ? parseInt(price.replace(/\D/g, ''), 10) : undefined;
       const artwork = await createArtwork({
         artist_id:        artistId,
         title:            title.trim(),
@@ -99,8 +115,15 @@ export function ListArtwork() {
         image_url:        imageUrl,
         thumbnail_url:    imageUrl,
         listing_type:     listingType,
-        price_torn:       price ? parseInt(price.replace(/\D/g, ''), 10) : undefined,
+        price_cr:         crAmount,
+        price_torn:       crAmount ? crAmount * 835 : undefined,
+        current_bid_cr:   listingType === 'auction' ? crAmount : undefined,
+        current_bid:      listingType === 'auction' && crAmount ? crAmount * 835 : undefined,
         auction_end_time: listingType === 'auction' && auctionEnd ? new Date(auctionEnd).toISOString() : undefined,
+        is_blind:         isBlind,
+        blind_cipher:     isBlind ? `Cipher #${Math.floor(100 + Math.random() * 900)}` : undefined,
+        is_pinned:        isPinned,
+        pin_expires_at:   isPinned ? new Date(Date.now() + 72 * 3600 * 1000).toISOString() : undefined,
         tags:             selectedTags,
         is_nsfw:          isNsfw,
         status:           'draft',
@@ -319,22 +342,63 @@ export function ListArtwork() {
             {/* Price / Auction end */}
             {listingType === 'fixed' && (
               <div>
-                <label htmlFor="art-price" className="form-label">Price (Torn Cash) *</label>
-                <input id="art-price" type="text" className="form-input" placeholder="50000" value={price} onChange={(e) => setPrice(e.target.value)} />
+                <label htmlFor="art-price" className="form-label">Price (Credits - CR) *</label>
+                <input id="art-price" type="text" className="form-input" placeholder="e.g. 5000 (5x Xanax)" value={price} onChange={(e) => setPrice(e.target.value)} />
+                <div style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)', marginTop: '4px' }}>
+                  Standard: 1,000 CR = 1x Xanax (≈ $835,000 Torn Cash)
+                </div>
               </div>
             )}
             {listingType === 'auction' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--seam)' }}>
-                <div style={{ background: 'var(--void)', padding: 'var(--sp-4)' }}>
-                  <label htmlFor="art-start-bid" className="form-label">Starting Bid</label>
-                  <input id="art-start-bid" type="text" className="form-input" placeholder="10000" value={price} onChange={(e) => setPrice(e.target.value)} />
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--seam)' }}>
+                  <div style={{ background: 'var(--void)', padding: 'var(--sp-4)' }}>
+                    <label htmlFor="art-start-bid" className="form-label">Starting Bid (CR)</label>
+                    <input id="art-start-bid" type="text" className="form-input" placeholder="e.g. 1000 (1x Xanax)" value={price} onChange={(e) => setPrice(e.target.value)} />
+                  </div>
+                  <div style={{ background: 'var(--void)', padding: 'var(--sp-4)' }}>
+                    <label htmlFor="art-auction-end" className="form-label">Auction End</label>
+                    <input id="art-auction-end" type="datetime-local" className="form-input" value={auctionEnd} onChange={(e) => setAuctionEnd(e.target.value)} />
+                  </div>
                 </div>
-                <div style={{ background: 'var(--void)', padding: 'var(--sp-4)' }}>
-                  <label htmlFor="art-auction-end" className="form-label">Auction End</label>
-                  <input id="art-auction-end" type="datetime-local" className="form-input" value={auctionEnd} onChange={(e) => setAuctionEnd(e.target.value)} />
+
+                {/* Blind Auction Toggle */}
+                <div style={{ padding: '14px 16px', background: 'rgba(230, 25, 25, 0.05)', border: '1px solid rgba(230, 25, 25, 0.25)', borderRadius: '3px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={isBlind}
+                      onChange={(e) => setIsBlind(e.target.checked)}
+                      style={{ width: 16, height: 16, accentColor: 'var(--crimson)', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--phosphor)', fontWeight: 600 }}>
+                      Enable Sealed Blind Auction
+                    </span>
+                  </label>
+                  <div style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)', marginTop: '4px', paddingLeft: '24px' }}>
+                    Masks your artist profile under an anonymous cipher until the auction ends. Guarantees pure merit bidding with zero faction or popularity bias.
+                  </div>
                 </div>
-              </div>
+              </>
             )}
+
+            {/* Featured Pin Option (10 Xanax fee) */}
+            <div style={{ padding: '14px 16px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '3px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={isPinned}
+                  onChange={(e) => setIsPinned(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: '#fbbf24', cursor: 'pointer' }}
+                />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
+                  ⭐ Feature on Front-Page Hero (10 Xanax / 10,000 CR Fee)
+                </span>
+              </label>
+              <div style={{ fontSize: '0.6875rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)', marginTop: '4px', paddingLeft: '24px' }}>
+                Pins your artwork to the top hero showcase for 72 hours. Fee will be automatically deducted from your Escrow Wallet balance.
+              </div>
+            </div>
 
             {/* Tags */}
             <div>

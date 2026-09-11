@@ -44,6 +44,7 @@ import type {
 } from '../types/achievement';
 import { useToast } from '../context/ToastContext';
 import { useAuthStore } from '../store/authStore';
+import { AvatarWithFrame } from '../components/common/AvatarWithFrame';
 
 export function AchievementsHub() {
   const { toast } = useToast();
@@ -157,43 +158,64 @@ export function AchievementsHub() {
   if (!progression) return null;
 
   return (
-    <main className="page-content achievements-page">
-      {/* ── TOP BREADCRUMB TELEMETRY ──────────────────────────── */}
-      <div className="container" style={{ paddingTop: 'var(--sp-6)', paddingBottom: 'var(--sp-4)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-          <Link
-            to="/collector"
-            className="navbar-link"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.6875rem' }}
-          >
-            <ArrowLeft size={14} weight="bold" /> RETURN TO DOSSIER
-          </Link>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)', letterSpacing: '0.12em' }}>
-            [ SYNDICATE ACCREDITATIONS // CRIME 2.0 UNDERWORLD PRESTIGE ]
+    <main className="page-content achievements-page" style={{ minHeight: '100vh', background: 'var(--void)' }}>
+      {/* ── RENAISSANCE TOP HEADER ──────────────────────────── */}
+      <div className="renaissance-page-header">
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <div className="renaissance-chapter-tag">
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--neon-magenta)', display: 'inline-block', boxShadow: '0 0 8px var(--neon-magenta)' }} />
+                CHAPTER V &bull; UNDERWORLD ACCOLADES &bull; PRESTIGE RANKING
+              </div>
+
+              <h1 className="renaissance-title">
+                Underworld Accolades
+              </h1>
+              <p className="renaissance-subtitle">
+                Ascend the syndicate ranks. Complete high-stakes market operations, claim exclusive cosmetic titles, and forge legendary avatar frames.
+              </p>
+            </div>
+
+            {/* Return Link */}
+            <Link
+              to="/browse"
+              className="renaissance-btn-gold"
+              style={{ fontSize: '0.6875rem', padding: '8px 16px' }}
+            >
+              <ArrowLeft size={12} weight="bold" /> Return to Exhibition
+            </Link>
           </div>
         </div>
       </div>
 
       {/* ── HERO SYNDICATE PRESTIGE MATRIX ────────────────────── */}
       <div className="container">
-        <div className="achievements-hero-card">
+        <div className="renaissance-glass-panel" style={{ padding: '28px', marginBottom: 'var(--sp-8)' }}>
           <div className="achievements-telemetry-row">
             {/* Level & Rank Display */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-5)' }}>
-              <div className="achievements-level-badge">
+              <div style={{
+                background: 'rgba(255, 0, 127, 0.1)',
+                border: '1px solid var(--neon-magenta)',
+                borderRadius: '8px',
+                padding: '12px 18px',
+                textAlign: 'center',
+                boxShadow: '0 0 20px rgba(255, 0, 127, 0.2)'
+              }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--red-hi)', letterSpacing: '0.1em' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--antique-gold)', letterSpacing: '0.12em' }}>
                     SYNDICATE MASTERY
                   </span>
-                  <div className="achievements-level-num">
+                  <div style={{ fontFamily: 'var(--font-cinzel)', fontSize: '1.8rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.1 }}>
                     LVL {progression.level}
                   </div>
                 </div>
               </div>
 
-              <div style={{ borderLeft: '1px solid var(--seam)', paddingLeft: 'var(--sp-5)' }}>
+              <div style={{ borderLeft: '1px solid rgba(244, 241, 234, 0.08)', paddingLeft: 'var(--sp-5)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--phosphor)', textTransform: 'uppercase' }}>
+                  <span style={{ fontFamily: 'var(--font-cinzel)', fontSize: '1.35rem', color: 'var(--phosphor)', fontWeight: 600 }}>
                     {progression.tierTitle}
                   </span>
                   {progression.equippedTitle && (
@@ -203,56 +225,54 @@ export function AchievementsHub() {
                   )}
                 </div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
-                  REPUTATION SCORE: <span style={{ color: 'var(--term-green)', fontWeight: 700 }}>{progression.totalReputation.toLocaleString()} PTS</span>
-                  <span style={{ margin: '0 8px', color: 'var(--seam)' }}>·</span>
-                  UNLOCKED: <span style={{ color: '#fbbf24', fontWeight: 700 }}>{progression.unlockedAchievements} / {progression.totalAchievements}</span>
+                  REPUTATION SCORE: <span style={{ color: 'var(--antique-gold)', fontWeight: 700 }}>{progression.totalReputation.toLocaleString()} PTS</span>
+                  <span style={{ margin: '0 8px', color: 'rgba(244, 241, 234, 0.2)' }}>&bull;</span>
+                  UNLOCKED: <span style={{ color: 'var(--neon-magenta)', fontWeight: 700 }}>{progression.unlockedAchievements} / {progression.totalAchievements}</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Vanity Preview */}
-            <div className="vanity-preview-box">
-              <div className="collector-avatar-wrap" style={{ width: '60px', height: '60px' }}>
-                <img
-                  src={avatarUrl}
-                  alt={username}
-                  className={`collector-avatar-img ${progression.equippedFrame?.cssClass || 'frame-operative'}`}
-                  style={{ width: '60px', height: '60px' }}
-                />
-              </div>
+            <div className="vanity-preview-box" style={{ background: 'rgba(10, 13, 12, 0.6)', border: '1px solid rgba(244, 241, 234, 0.08)' }}>
+              <AvatarWithFrame
+                size="lg"
+                avatarUrl={avatarUrl}
+                frame={progression.equippedFrame}
+                alt={username}
+              />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--antique-gold)' }}>
                   ACTIVE VANITY LOADOUT
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: '#fbbf24', fontWeight: 700 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--phosphor)', fontWeight: 700 }}>
                   {progression.equippedFrame?.name || 'Standard Operative'}
                 </span>
                 <button
                   type="button"
                   onClick={() => setActiveTab('armory')}
-                  className="btn btn-ghost btn-sm"
-                  style={{ fontSize: '0.5625rem', padding: '2px 8px', marginTop: '4px', alignSelf: 'flex-start' }}
+                  className="renaissance-btn-gold"
+                  style={{ fontSize: '0.5625rem', padding: '3px 8px', marginTop: '4px', alignSelf: 'flex-start' }}
                 >
-                  CUSTOMIZE LOADOUT →
+                  CUSTOMIZE LOADOUT &rarr;
                 </button>
               </div>
             </div>
           </div>
 
           {/* Level Progress Bar */}
-          <div>
+          <div style={{ marginTop: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '0.625rem', marginBottom: '6px' }}>
               <span style={{ color: 'var(--ghost)' }}>
                 EXPERIENCE TO LEVEL {progression.level + 1}
               </span>
-              <span style={{ color: '#fbbf24' }}>
+              <span style={{ color: 'var(--antique-gold)' }}>
                 {progression.currentExp} / {progression.nextLevelExp} EXP ({Math.round((progression.currentExp / progression.nextLevelExp) * 100)}%)
               </span>
             </div>
-            <div className="achievements-exp-track">
+            <div className="achievements-exp-track" style={{ background: 'rgba(244, 241, 234, 0.05)' }}>
               <div
                 className="achievements-exp-fill"
-                style={{ width: `${(progression.currentExp / progression.nextLevelExp) * 100}%` }}
+                style={{ width: `${(progression.currentExp / progression.nextLevelExp) * 100}%`, background: 'linear-gradient(90deg, var(--neon-magenta), var(--antique-gold))' }}
               />
             </div>
           </div>
@@ -305,11 +325,11 @@ export function AchievementsHub() {
             <button
               type="button"
               onClick={() => setActiveTab('accreditations')}
-              className={`collector-tab-btn${activeTab === 'accreditations' ? ' active' : ''}`}
+              className={`renaissance-pill${activeTab === 'accreditations' ? ' active' : ''}`}
             >
               <ShieldCheck size={14} /> UNDERWORLD ACCREDITATIONS ({achievements.length})
               {unclaimedCount > 0 && (
-                <span style={{ background: '#fbbf24', color: '#000', padding: '1px 5px', fontSize: '0.5625rem', borderRadius: '2px', fontWeight: 700, marginLeft: '4px' }}>
+                <span style={{ background: 'var(--antique-gold)', color: '#000', padding: '1px 6px', fontSize: '0.5625rem', borderRadius: '4px', fontWeight: 700, marginLeft: '4px' }}>
                   {unclaimedCount} READY
                 </span>
               )}
@@ -317,9 +337,9 @@ export function AchievementsHub() {
             <button
               type="button"
               onClick={() => setActiveTab('armory')}
-              className={`collector-tab-btn${activeTab === 'armory' ? ' active' : ''}`}
+              className={`renaissance-pill${activeTab === 'armory' ? ' active' : ''}`}
             >
-              <Sparkle size={14} /> TITLES & FRAMES ARMORY ({titles.length + frames.length})
+              <Sparkle size={14} /> VANITY ARMORY ({titles.length + frames.length})
             </button>
           </div>
 
@@ -413,10 +433,10 @@ export function AchievementsHub() {
 
                       <div>
                         <h3 className="achievement-title">
-                          {ach.secret && !ach.unlocked ? 'CLASSIFIED PROTOCOL' : ach.title}
+                          {ach.secret && !ach.unlocked ? 'SECRET ACHIEVEMENT' : ach.title}
                         </h3>
                         <p className="achievement-desc">
-                          {ach.secret && !ach.unlocked ? (ach.hint || 'Encrypted dark-ops objective. Fulfill underworld prerequisites to de-anonymize.') : ach.description}
+                          {ach.secret && !ach.unlocked ? (ach.hint || 'Hidden secret objective. Complete special actions to unlock.') : ach.description}
                         </p>
                       </div>
                     </div>
@@ -513,14 +533,14 @@ export function AchievementsHub() {
               gap: 'var(--sp-6)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-5)' }}>
-                <div className="collector-avatar-wrap" style={{ width: '90px', height: '90px' }}>
-                  <img
-                    src={avatarUrl}
-                    alt={username}
-                    className={`collector-avatar-img ${progression.equippedFrame?.cssClass || 'frame-operative'}`}
-                  />
-                  <span className="collector-level-tag">LVL {progression.level}</span>
-                </div>
+                <AvatarWithFrame
+                  size="xl"
+                  avatarUrl={avatarUrl}
+                  frame={progression.equippedFrame}
+                  showLevel
+                  level={progression.level}
+                  alt={username}
+                />
 
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -629,14 +649,12 @@ export function AchievementsHub() {
                 {frames.map((f) => (
                   <div key={f.id} className={`vanity-item-card${f.equipped ? ' equipped' : ''}`}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div className="collector-avatar-wrap" style={{ width: '50px', height: '50px' }}>
-                        <img
-                          src={avatarUrl}
-                          alt={f.name}
-                          className={`collector-avatar-img ${f.cssClass}`}
-                          style={{ width: '50px', height: '50px' }}
-                        />
-                      </div>
+                      <AvatarWithFrame
+                        size="md"
+                        avatarUrl={avatarUrl}
+                        frame={f}
+                        alt={f.name}
+                      />
                       <div>
                         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', textTransform: 'uppercase', color: 'var(--phosphor)', margin: 0 }}>
                           {f.name}

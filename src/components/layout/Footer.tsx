@@ -1,35 +1,36 @@
 import { Link } from 'react-router-dom';
+import { CovenLogo } from '../common/CovenLogo';
 
 export function Footer() {
   const year = new Date().getFullYear();
 
   const cols = [
     {
-      title: 'Market',
+      title: 'Marketplace',
       links: [
-        { label: 'Browse Art', href: '/browse' },
-        { label: 'Live Auctions', href: '/auctions' },
-        { label: 'Commission Work', href: '/commissions' },
-        { label: 'New Drops', href: '/browse?sort=newest' },
+        { label: 'All Artworks', href: '/browse' },
+        { label: 'Blind Auctions', href: '/auctions' },
+        { label: 'Commission Ahmad', href: '/commissions' },
+        { label: 'Wallet & Escrow', href: '/wallet' },
+        { label: 'Player Achievements', href: '/achievements' },
       ],
     },
     {
-      title: 'Artists',
+      title: 'Community',
       links: [
-        { label: 'All Artists', href: '/artists' },
-        { label: 'Verified', href: '/artists?filter=verified' },
-        { label: 'Rising', href: '/artists?filter=rising' },
-        { label: 'Apply', href: '/apply' },
+        { label: 'About Ahmad (Artist)', href: '/#chapter-4' },
+        { label: 'Messages & Activity', href: '/dispatches' },
+        { label: 'Torn City Script (HUD)', href: '/userscript' },
+        { label: 'Notifications', href: '/notifications' },
       ],
     },
     {
-      title: 'Platform',
+      title: 'Help & Safety',
       links: [
-        { label: 'About', href: '/about' },
-        { label: 'FAQ', href: '/faq' },
-        { label: 'Torn Extension (UserScript)', href: '/userscript' },
-        { label: 'Privacy', href: '/privacy' },
-        { label: 'Terms', href: '/terms' },
+        { label: 'Frequently Asked Questions', href: '/faq' },
+        { label: 'API Key Safety & Security', href: '/disclosure' },
+        { label: 'Terms of Escrow', href: '/terms' },
+        { label: 'Privacy Policy', href: '/privacy' },
       ],
     },
   ];
@@ -40,11 +41,11 @@ export function Footer() {
         <div className="footer-inner">
           {/* Brand col */}
           <div className="footer-col">
-            <div className="footer-logo">COVEN</div>
-            <p className="footer-tagline">
-              Torn's independent<br />
-              art market.<br />
-              Est. {year}.
+            <div style={{ marginBottom: '16px' }}>
+              <CovenLogo size="md" />
+            </div>
+            <p className="footer-tagline" style={{ lineHeight: 1.6, color: 'var(--ghost)', fontSize: '0.8125rem' }}>
+              Torn City's digital art market and blind auction house. Safe, fast trading backed by Xanax escrow.
             </p>
           </div>
           {cols.map((col) => (
@@ -63,9 +64,9 @@ export function Footer() {
 
         <hr className="hr-full" />
         <div className="footer-bottom" style={{ marginTop: '24px' }}>
-          <span>COVEN ART MARKET / TORN CITY / {year}</span>
-          <span>NOT AFFILIATED WITH TORN LTD</span>
-          <span>[ REV 1.0 ]</span>
+          <span>COVEN ART MARKET &bull; TORN CITY &bull; {year}</span>
+          <span>NOT AFFILIATED WITH TORN CITY LTD</span>
+          <span>SAFE &bull; ESCROW PROTECTED</span>
         </div>
       </div>
     </footer>

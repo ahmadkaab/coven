@@ -9,7 +9,7 @@ import {
 
 export function useArtistStudio(artistId: string | undefined, fallbackArtist?: Artist) {
   const [studio, setStudio] = useState<ArtistStudioConfig>(() => {
-    return getArtistStudioConfig(artistId || 'coven-artist-01', fallbackArtist);
+    return getArtistStudioConfig(artistId || 'artist-ahmad-01', fallbackArtist);
   });
 
   useEffect(() => {

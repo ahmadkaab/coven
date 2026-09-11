@@ -35,29 +35,38 @@ import { CommissionDetailModal } from '../components/commission/CommissionDetail
 import { VaultUnlockModal } from '../components/artwork/VaultUnlockModal';
 import { ProvenanceCertificateModal } from '../components/artwork/ProvenanceCertificateModal';
 import { buildProvenanceCertificate } from '../services/vaultService';
+import { getWallet } from '../services/walletService';
 import { formatTornCash, timeAgo } from '../utils/format';
 import type { Commission } from '../types';
 
-const BASE_TABS = ['Overview', 'My Listings', 'Commissions', 'Transactions', 'Watchlist'] as const;
-const ARTIST_TABS = ['Overview', 'My Listings', 'Analytics', 'Studio', 'Commissions', 'Transactions', 'Watchlist'] as const;
-type Tab = typeof ARTIST_TABS[number];
+const COLLECTOR_TABS = ['Overview', 'My Collection', 'My Commissions', 'Transactions', 'Watchlist'] as const;
+const ARTIST_TABS = ['Overview', 'My Listings', 'Studio', 'Analytics', 'Commissions', 'Transactions', 'Watchlist'] as const;
+type Tab = 'Overview' | 'My Collection' | 'My Listings' | 'Studio' | 'Analytics' | 'Commissions' | 'My Commissions' | 'Transactions' | 'Watchlist';
 
 export function Dashboard() {
   const { user, apiKey, userId, artistId, isArtist, logout } = useAuth();
   const { toast } = useToast();
   const reduce = useReducedMotion();
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
-  const TABS = useMemo(() => isArtist ? ARTIST_TABS : BASE_TABS, [isArtist]);
+
+  const isAhmadUser = isArtist || user?.player_id === 4295891 || user?.name === 'ahmad_kaab';
+  const TABS = useMemo(() => isAhmadUser ? ARTIST_TABS : COLLECTOR_TABS, [isAhmadUser]);
+
+  // Escrow Wallet
+  const [wallet, setWallet] = useState(() => userId ? getWallet(userId, userId) : null);
+  useEffect(() => {
+    if (userId) setWallet(getWallet(userId, userId));
+  }, [userId]);
 
   // Analytics data (only fetched when artist + tab is active)
   const { data: revenueStats, isLoading: revenueLoading } = useRevenueStats(
-    isArtist && activeTab === 'Analytics' ? artistId : undefined
+    isAhmadUser && activeTab === 'Analytics' ? (artistId || 'artist-ahmad-01') : undefined
   );
   const { data: artworkPerf, isLoading: perfLoading } = useArtworkPerformance(
-    isArtist && activeTab === 'Analytics' ? artistId : undefined
+    isAhmadUser && activeTab === 'Analytics' ? (artistId || 'artist-ahmad-01') : undefined
   );
   const { data: audienceData, isLoading: audienceLoading } = useAudienceInsights(
-    isArtist && activeTab === 'Analytics' ? artistId : undefined
+    isAhmadUser && activeTab === 'Analytics' ? (artistId || 'artist-ahmad-01') : undefined
   );
 
   // If artist, fetch their artworks
@@ -87,8 +96,16 @@ export function Dashboard() {
   const [watchlist, setWatchlist] = useState<import('../types').Artwork[]>([]);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
 
+  // Collector purchases (for My Collection)
+  const myPurchases = useMemo(() => {
+    return transactions.filter(t => 
+      (t.buyer_user_id === userId || (t.buyer?.torn_id && t.buyer.torn_id === String(user?.player_id))) && 
+      t.status === 'verified'
+    );
+  }, [transactions, userId, user?.player_id]);
+
   // Artist Studio Hub
-  const { studio, updateStudio, updateSlot } = useArtistStudio(artistId || 'coven-artist-01');
+  const { studio, updateStudio, updateSlot } = useArtistStudio(artistId || 'artist-ahmad-01');
   const [showDashboardForumShop, setShowDashboardForumShop] = useState(false);
   const [studioFormData, setStudioFormData] = useState<{
     studioName: string;
@@ -247,39 +264,46 @@ export function Dashboard() {
       {/* ── TOP BAR ─────────────────────────────────────────── */}
       <div style={{ borderBottom: '2px solid var(--red)', background: 'var(--pit)', paddingTop: '24px' }}>
         <div className="container">
-          <div style={{ padding: 'var(--sp-6) 0 0', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <div style={{ padding: 'var(--sp-6) 0 0', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 'var(--sp-2)' }}>
-                [ ACCOUNT PANEL ]
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: isAhmadUser ? 'var(--antique-gold)' : 'var(--neon-magenta)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 'var(--sp-2)' }}>
+                {isAhmadUser ? '◈ SOVEREIGN ARTIST // PLATFORM COMMAND' : '◈ MY ACCOUNT // COLLECTOR VAULT'}
               </div>
               <h1 style={{
-                fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 4rem)',
-                lineHeight: 0.9, letterSpacing: '-0.04em', textTransform: 'uppercase', color: 'var(--phosphor)',
+                fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                lineHeight: 1, letterSpacing: '0.02em', color: '#fff', margin: 0,
               }}>
                 {user.name}
               </h1>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)', marginTop: 'var(--sp-2)' }}>
-                TID #{user.player_id} / Level {user.level} / {user.rank}
-                {isArtist && <span style={{ marginLeft: '12px', color: 'var(--term-green)' }}>◈ ARTIST</span>}
+                TID #{user.player_id} &bull; Level {user.level} &bull; {user.rank}
+                {isAhmadUser && <span style={{ marginLeft: '12px', color: 'var(--antique-gold)', fontWeight: 700 }}>◈ SOVEREIGN ARTIST</span>}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
-              {isArtist && (
-                <Link to="/list-artwork" className="btn btn-primary btn-sm">
-                  <Plus size={12} weight="bold" />List Artwork
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: 'var(--sp-4)' }}>
+              {isAhmadUser ? (
+                <>
+                  <Link to="/studio" className="renaissance-btn-gold" style={{ fontSize: '0.6875rem', padding: '7px 14px', textDecoration: 'none' }}>
+                    Open Artist Studio ↗
+                  </Link>
+                  <Link to="/admin" className="renaissance-btn-primary" style={{ fontSize: '0.6875rem', padding: '7px 14px', textDecoration: 'none' }}>
+                    Executive Console ↗
+                  </Link>
+                </>
+              ) : (
+                <Link to="/commissions" className="renaissance-btn-gold" style={{ fontSize: '0.6875rem', padding: '7px 14px', textDecoration: 'none' }}>
+                  Commission Ahmad ⚡
                 </Link>
               )}
-              {!isArtist && (
-                <Link to="/register-artist" className="btn btn-industrial btn-sm">
-                  Become an Artist
-                </Link>
-              )}
-              <button onClick={logout} className="btn btn-ghost btn-sm">Logout</button>
+              <Link to="/wallet" className="btn btn-sm btn-ghost" style={{ fontSize: '0.6875rem' }}>
+                Wallet & Escrow
+              </Link>
+              <button onClick={logout} className="btn btn-ghost btn-sm" style={{ fontSize: '0.6875rem' }}>Logout</button>
             </div>
           </div>
 
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: '1px', background: 'var(--seam)', marginTop: 'var(--sp-4)' }}>
+          <div className="no-scrollbar" style={{ display: 'flex', gap: '1px', background: 'var(--seam)', marginTop: 'var(--sp-4)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             {TABS.map((tab) => (
               <button
                 key={tab}
@@ -293,6 +317,8 @@ export function Dashboard() {
                   borderBottom: activeTab === tab ? '2px solid var(--red)' : '2px solid transparent',
                   transition: 'all 0.15s',
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  minHeight: '40px',
                 }}
               >
                 {tab}
@@ -312,13 +338,46 @@ export function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
+            {/* Ahmad Sovereign Master Banner */}
+            {isAhmadUser && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(0, 0, 0, 0.5))',
+                border: '1px solid var(--antique-gold)',
+                borderRadius: '6px',
+                padding: '18px 24px',
+                marginBottom: 'var(--sp-8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px'
+              }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-cinzel)', fontWeight: 700, color: 'var(--antique-gold)', fontSize: '1.05rem', marginBottom: '4px' }}>
+                    👑 Master Artist Command Active
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--ghost)', margin: 0, maxWidth: '650px', lineHeight: 1.5 }}>
+                    You are logged in as Sovereign Master Ahmad [4295891]. You have full control over art listings, client commission queues, and platform escrow payouts.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Link to="/studio" className="renaissance-btn-gold" style={{ textDecoration: 'none', fontSize: '0.75rem', padding: '10px 18px' }}>
+                    Open Artist Studio ↗
+                  </Link>
+                  <Link to="/admin" className="renaissance-btn-primary" style={{ textDecoration: 'none', fontSize: '0.75rem', padding: '10px 18px' }}>
+                    Executive Console ↗
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* Stats cells */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--seam)', marginBottom: 'var(--sp-8)' }}>
-              {[
-                { label: 'Artworks Listed', val: myArtworks.length, icon: <Image size={12} weight="bold" /> },
-                { label: 'Active Auctions', val: myArtworks.filter(a => a.listing_type === 'auction' && a.status === 'available').length, icon: <Lightning size={12} weight="fill" color="var(--red)" /> },
-                { label: 'Total Sales',     val: transactions.filter(t => t.seller_user_id === userId && t.status === 'verified').length, icon: <CheckCircle size={12} weight="fill" color="var(--term-green)" /> },
-                { label: 'Pending',         val: transactions.filter(t => t.status === 'pending').length, icon: <Clock size={12} weight="bold" /> },
+            <div className="grid-responsive-4" style={{ gap: '1px', background: 'var(--seam)', marginBottom: 'var(--sp-8)' }}>
+              {isAhmadUser ? [
+                { label: 'Artworks Listed', val: myArtworks.length, icon: <Image size={14} weight="bold" /> },
+                { label: 'Active Auctions', val: myArtworks.filter(a => a.listing_type === 'auction' && a.status === 'available').length, icon: <Lightning size={14} weight="fill" color="var(--red)" /> },
+                { label: 'Total Sales',     val: transactions.filter(t => t.seller_user_id === userId && t.status === 'verified').length, icon: <CheckCircle size={14} weight="fill" color="var(--term-green)" /> },
+                { label: 'Pending Payouts', val: transactions.filter(t => t.status === 'pending').length, icon: <Clock size={14} weight="bold" /> },
               ].map((s, i) => (
                 <div key={i} style={{ background: 'var(--plate)', padding: 'var(--sp-5) var(--sp-6)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-3)' }}>
@@ -331,54 +390,233 @@ export function Dashboard() {
                     {s.val}
                   </div>
                 </div>
+              )) : [
+                { label: 'Artworks Owned', val: myPurchases.length, icon: <Image size={14} weight="bold" /> },
+                { label: 'Active Commissions', val: commissions.filter(c => c.status !== 'completed' && c.status !== 'cancelled').length, icon: <Lightning size={14} weight="fill" color="var(--antique-gold)" /> },
+                { label: 'Escrow Balance', val: `${wallet?.balance_cr?.toLocaleString() ?? 0} CR`, icon: <ShieldCheck size={14} weight="bold" color="var(--term-green)" /> },
+                { label: 'Saved Watchlist', val: watchlist.length, icon: <Heart size={14} weight="fill" color="var(--crimson)" /> },
+              ].map((s, i) => (
+                <div key={i} style={{ background: 'var(--plate)', padding: 'var(--sp-5) var(--sp-6)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-3)' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      {s.label}
+                    </div>
+                    {s.icon}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--phosphor)' }}>
+                    {s.val}
+                  </div>
+                </div>
               ))}
             </div>
 
             {/* Quick actions */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--seam)' }}>
-              <Link
-                to="/list-artwork"
-                style={{
-                  background: 'var(--plate)', padding: 'var(--sp-8)',
-                  display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
-                  borderLeft: '4px solid var(--red)',
-                  textDecoration: 'none',
-                  transition: 'background 0.15s',
-                }}
-              >
-                <Plus size={24} color="var(--red)" weight="bold" />
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--phosphor)', marginBottom: '6px' }}>
-                    List Artwork
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
-                    Upload and list a new piece for sale or auction
-                  </div>
-                </div>
-                <ArrowUpRight size={14} color="var(--ghost)" weight="bold" style={{ marginTop: 'auto', alignSelf: 'flex-end' }} />
-              </Link>
+            <div className="grid-responsive-2" style={{ gap: '1px', background: 'var(--seam)' }}>
+              {isAhmadUser ? (
+                <>
+                  <Link
+                    to="/list-artwork"
+                    style={{
+                      background: 'var(--plate)', padding: 'var(--sp-8)',
+                      display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
+                      borderLeft: '4px solid var(--red)',
+                      textDecoration: 'none',
+                      transition: 'background 0.15s',
+                    }}
+                  >
+                    <Plus size={24} color="var(--red)" weight="bold" />
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--phosphor)', marginBottom: '6px' }}>
+                        List Artwork
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
+                        Upload and list a new masterpiece for sale or blind auction
+                      </div>
+                    </div>
+                    <ArrowUpRight size={14} color="var(--ghost)" weight="bold" style={{ marginTop: 'auto', alignSelf: 'flex-end' }} />
+                  </Link>
 
-              <Link
-                to="/browse"
-                style={{
-                  background: 'var(--plate)', padding: 'var(--sp-8)',
-                  display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
-                  borderLeft: '4px solid var(--hull)',
-                  textDecoration: 'none',
-                }}
-              >
-                <Image size={24} color="var(--ghost)" weight="bold" />
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--phosphor)', marginBottom: '6px' }}>
-                    Browse Market
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
-                    Discover and bid on new artworks
-                  </div>
-                </div>
-                <ArrowUpRight size={14} color="var(--ghost)" weight="bold" style={{ marginTop: 'auto', alignSelf: 'flex-end' }} />
+                  <Link
+                    to="/studio"
+                    style={{
+                      background: 'var(--plate)', padding: 'var(--sp-8)',
+                      display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
+                      borderLeft: '4px solid var(--antique-gold)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <PenNib size={24} color="var(--antique-gold)" weight="bold" />
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--phosphor)', marginBottom: '6px' }}>
+                        Artist Studio & Orders
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
+                        Manage commission requests, update progress, and generate forum BBCode
+                      </div>
+                    </div>
+                    <ArrowUpRight size={14} color="var(--ghost)" weight="bold" style={{ marginTop: 'auto', alignSelf: 'flex-end' }} />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/browse"
+                    style={{
+                      background: 'var(--plate)', padding: 'var(--sp-8)',
+                      display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
+                      borderLeft: '4px solid var(--neon-magenta)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <Image size={24} color="var(--neon-magenta)" weight="bold" />
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--phosphor)', marginBottom: '6px' }}>
+                        Browse Marketplace
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
+                        Explore authentic artworks available for instant purchase or auction
+                      </div>
+                    </div>
+                    <ArrowUpRight size={14} color="var(--ghost)" weight="bold" style={{ marginTop: 'auto', alignSelf: 'flex-end' }} />
+                  </Link>
+
+                  <Link
+                    to="/commissions"
+                    style={{
+                      background: 'var(--plate)', padding: 'var(--sp-8)',
+                      display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
+                      borderLeft: '4px solid var(--antique-gold)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <Lightning size={24} color="var(--antique-gold)" weight="fill" />
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', textTransform: 'uppercase', letterSpacing: '-0.02em', color: 'var(--phosphor)', marginBottom: '6px' }}>
+                        Commission Ahmad
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)' }}>
+                        Order a custom Torn profile signature, avatar, or faction graphic
+                      </div>
+                    </div>
+                    <ArrowUpRight size={14} color="var(--ghost)" weight="bold" style={{ marginTop: 'auto', alignSelf: 'flex-end' }} />
+                  </Link>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* MY COLLECTION (COLLECTORS) */}
+        {activeTab === 'My Collection' && (
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-6)', borderBottom: '1px solid var(--seam)', paddingBottom: 'var(--sp-4)', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 className="section-h2" style={{ margin: 0 }}>MY ARTWORK COLLECTION</h2>
+                <p style={{ fontSize: '0.75rem', color: 'var(--ghost)', margin: 0, marginTop: '4px' }}>
+                  Authenticated pieces you own. Download master vault files and official Certificates of Provenance.
+                </p>
+              </div>
+              <Link to="/browse" className="btn btn-sm btn-ghost" style={{ fontSize: '0.6875rem' }}>
+                Find More Art <ArrowSquareOut size={12} />
               </Link>
             </div>
+
+            {myPurchases.length === 0 ? (
+              <div style={{ padding: 'var(--sp-16)', textAlign: 'center', border: '1px solid var(--hull)', background: 'var(--plate)', borderRadius: '6px' }}>
+                <Image size={44} color="var(--ghost)" weight="light" style={{ marginBottom: '12px' }} />
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', textTransform: 'uppercase', color: '#fff', letterSpacing: '-0.02em', marginBottom: '8px' }}>
+                  NO ARTWORKS IN YOUR COLLECTION YET
+                </div>
+                <p style={{ fontSize: '0.8125rem', color: 'var(--ghost)', maxWidth: '440px', margin: '0 auto 20px', lineHeight: 1.5 }}>
+                  When you purchase an artwork on the marketplace or win an auction, it will appear here with full master vault download access and BBCode forum badges.
+                </p>
+                <Link to="/browse" className="renaissance-btn-gold" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '0.75rem' }}>
+                  Explore Marketplace
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                {myPurchases.map((tx) => (
+                  <div
+                    key={tx.id}
+                    style={{
+                      background: 'var(--plate)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <div style={{ position: 'relative', aspectRatio: '16/9', background: '#000', overflow: 'hidden' }}>
+                      <img
+                        src={tx.artwork?.image_url || tx.artwork?.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80'}
+                        alt={tx.artwork?.title || 'Purchased Artwork'}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <div style={{
+                        position: 'absolute', top: 8, right: 8,
+                        background: 'rgba(16, 185, 129, 0.9)', color: '#000',
+                        fontWeight: 700, fontSize: '0.625rem', padding: '2px 8px', borderRadius: '3px',
+                        fontFamily: 'var(--font-mono)'
+                      }}>
+                        ✓ OWNED & PROVEN
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-cinzel)', fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>
+                          {tx.artwork?.title || 'Bespoke Commission Piece'}
+                        </div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)', marginTop: '2px' }}>
+                          Artist: Ahmad Kaab [4295891] &bull; Paid: {formatTornCash(tx.amount)}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                        {tx.artwork && (
+                          <>
+                            <button
+                              onClick={() => setVaultTarget(tx)}
+                              className="btn btn-primary btn-sm"
+                              style={{ fontSize: '0.6875rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <DownloadSimple size={12} weight="bold" /> Download Vault
+                            </button>
+                            <button
+                              onClick={() => setCertTarget(tx)}
+                              className="btn btn-industrial btn-sm"
+                              style={{ fontSize: '0.6875rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <Certificate size={12} color="var(--term-green)" /> Certificate
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => setReceiptTarget(tx)}
+                          className="btn btn-ghost btn-sm"
+                          style={{ fontSize: '0.6875rem', padding: '6px 10px', color: 'var(--ghost)' }}
+                        >
+                          <Receipt size={12} /> Receipt
+                        </button>
+                        <button
+                          onClick={() => setReviewTarget(tx)}
+                          className="btn btn-ghost btn-sm"
+                          style={{ fontSize: '0.6875rem', padding: '6px 10px', color: 'var(--amber)' }}
+                        >
+                          <Star size={12} weight="fill" /> Review
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -426,13 +664,29 @@ export function Dashboard() {
           </motion.div>
         )}
 
-        {activeTab === 'Commissions' && (
+        {(activeTab === 'Commissions' || activeTab === 'My Commissions') && (
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h2 className="section-h2" style={{ marginBottom: 'var(--sp-6)' }}>COMMISSIONS</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-6)', borderBottom: '1px solid var(--seam)', paddingBottom: 'var(--sp-4)', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 className="section-h2" style={{ margin: 0 }}>
+                  {isAhmadUser ? 'COMMISSION ORDERS RECEIVED' : 'MY CUSTOM COMMISSIONS'}
+                </h2>
+                <p style={{ fontSize: '0.75rem', color: 'var(--ghost)', margin: 0, marginTop: '4px' }}>
+                  {isAhmadUser
+                    ? 'Custom art orders sent to you by Torn collectors. Manage stages, delivery, and payments.'
+                    : 'Custom artworks and graphics you ordered from Ahmad. Track progress, review drafts, and download finals.'}
+                </p>
+              </div>
+              {!isAhmadUser && (
+                <Link to="/commissions" className="renaissance-btn-gold" style={{ textDecoration: 'none', padding: '6px 14px', fontSize: '0.6875rem' }}>
+                  New Commission +
+                </Link>
+              )}
+            </div>
 
             {commissionsLoading ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'var(--seam)' }}>
@@ -447,13 +701,20 @@ export function Dashboard() {
                 ))}
               </div>
             ) : commissions.length === 0 ? (
-              <div style={{ padding: 'var(--sp-16)', textAlign: 'center', border: '1px solid var(--hull)', background: 'var(--plate)' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', textTransform: 'uppercase', color: 'var(--hull)', letterSpacing: '-0.04em', marginBottom: 'var(--sp-4)' }}>
-                  NO COMMISSIONS
+              <div style={{ padding: 'var(--sp-16)', textAlign: 'center', border: '1px solid var(--hull)', background: 'var(--plate)', borderRadius: '6px' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', textTransform: 'uppercase', color: '#fff', letterSpacing: '-0.02em', marginBottom: '8px' }}>
+                  {isAhmadUser ? 'NO ORDERS RECEIVED YET' : 'NO CUSTOM COMMISSIONS YET'}
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)' }}>
-                  Request commissions from artist profiles
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ghost)', maxWidth: '420px', margin: '0 auto 16px', lineHeight: 1.5 }}>
+                  {isAhmadUser
+                    ? 'Orders placed by collectors through your studio or shop will appear here.'
+                    : 'You have not commissioned any custom art yet. Need a forum signature, profile art, or faction banner?'}
                 </div>
+                {!isAhmadUser && (
+                  <Link to="/commissions" className="renaissance-btn-gold" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '0.75rem' }}>
+                    Commission Ahmad Directly
+                  </Link>
+                )}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'var(--seam)' }}>
@@ -1200,7 +1461,7 @@ export function Dashboard() {
                   FORUM SHOP BBCODE
                 </button>
                 <Link
-                  to={`/artist/${artistId || 'coven-artist-01'}`}
+                  to={`/artist/${artistId || 'artist-ahmad-01'}`}
                   className="btn btn-industrial btn-sm"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: 0 }}
                 >
@@ -1213,7 +1474,7 @@ export function Dashboard() {
             {/* Studio Settings & Queue Editor Two-Column Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
               gap: 'var(--sp-6)',
               marginBottom: 'var(--sp-8)',
             }}>
@@ -1238,7 +1499,7 @@ export function Dashboard() {
                       className="input-industrial"
                       value={studioFormData.studioName}
                       onChange={(e) => setStudioFormData({ ...studioFormData, studioName: e.target.value })}
-                      placeholder="e.g. BELL_QUEEN // CYBER VOID STUDIOS"
+                      placeholder="e.g. AHMAD_KAAB // RENAISSANCE ATELIER"
                       required
                     />
                   </div>
@@ -1257,7 +1518,7 @@ export function Dashboard() {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
+                  <div className="grid-responsive-2" style={{ gap: 'var(--sp-4)' }}>
                     <div>
                       <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>
                         Studio Status
@@ -1490,7 +1751,7 @@ export function Dashboard() {
         <ForumShopModal
           studio={studio}
           artist={{
-            id: artistId || 'coven-artist-01',
+            id: artistId || 'artist-ahmad-01',
             username: user?.name || 'Artist',
             torn_id: user?.player_id ? String(user.player_id) : undefined,
             avatar_url: user?.profile_image,

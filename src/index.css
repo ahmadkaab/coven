@@ -1,12 +1,12 @@
 /* ============================================================
-   COVEN — Industrial Brutalist / Tactical Telemetry UI
-   Skill: design-taste-frontend + industrial-brutalist-ui + high-end-visual-design
-   Design Read: Underground art marketplace, overhaul, dark mode locked
-   DESIGN_VARIANCE: 9 / MOTION_INTENSITY: 8 / VISUAL_DENSITY: 5
+   COVEN — The Renaissance Edition
+   Inspired by: Shopify Editions (The Renaissance Edition)
+   Aesthetic: Classical Fresco x Cyber Underworld Streetwear
+   Typography: Cormorant Garamond + Cinzel + Plus Jakarta Sans + JetBrains Mono
    ============================================================ */
 
-/* Fonts: Archivo Black (display uppercase) + JetBrains Mono (data) + DM Sans (body) */
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+/* Fonts: Cormorant Garamond (editorial serif), Cinzel (classical Roman), Plus Jakarta Sans (body), JetBrains Mono (numerals) */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
 
 /* ── RESET ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,52 +16,58 @@ a { color: inherit; text-decoration: none; }
 button { border: none; background: none; cursor: pointer; font-family: inherit; color: inherit; }
 img { display: block; max-width: 100%; }
 
-/* ── INDUSTRIAL BRUTALIST TOKEN SYSTEM ──────────────────────── */
+/* ── RENAISSANCE EDITION TOKEN SYSTEM ──────────── */
 :root {
-  /* Tactical Telemetry Dark substrate */
-  --void:        #080808;   /* deactivated CRT — NOT pure black */
-  --pit:         #0F0F0F;
-  --plate:       #141414;
-  --hull:        #1C1C1C;
-  --bulkhead:    #242424;
-  --structure:   #2E2E2E;
-  --seam:        #3A3A3A;
-  --wire:        rgba(255, 255, 255, 0.08);
-  --border:      rgba(255, 255, 255, 0.08);
-  --carbon:      #111114;
+  /* Classical Museum Stone & Deep Fresco Canvas */
+  --void:        #0a0d0c;   /* Deep charcoal stone */
+  --pit:         #111413;   /* Recessed stone floor */
+  --plate:       #161a18;   /* Elevated architectural panel */
+  --hull:        #1d221f;   /* Structural container edge */
+  --bulkhead:    #242b27;
+  --structure:   #2e3631;
+  --seam:        rgba(244, 241, 234, 0.08);
+  --wire:        rgba(244, 241, 234, 0.08);
+  --border:      rgba(244, 241, 234, 0.08);
+  --carbon:      #080a09;
 
-  /* Phosphor type scale */
-  --phosphor:    #E8E8E8;   /* primary foreground */
-  --chalk:       #F3F3F6;
-  --ghost:       #9E9EA8;
-  --shadow-type: #5C5C66;
-  --dead:        #383838;
-  --text-h:      #FFFFFF;
+  /* Parchment & Antique Linen Typography */
+  --phosphor:    #f4f1ea;   /* Soft antique linen parchment */
+  --chalk:       #ffffff;
+  --ghost:       #939c91;   /* Muted fresco stone text */
+  --shadow-type: #5f685d;   /* Subdued chapter telemetry */
+  --dead:        #282f2b;
+  --text-h:      #f4f1ea;
 
-  /* Aviation red — the ONE accent. Used nowhere generically. */
-  --red:         #E61919;
-  --red-hi:      #FF2A2A;
-  --red-lo:      #8A0A0A;
-  --red-plate:   rgba(230, 25, 25, 0.08);
-  --accent:      var(--red);
-  --accent-bg:   rgba(230, 25, 25, 0.1);
-  --accent-border: rgba(230, 25, 25, 0.3);
+  /* Anachronistic Pop Accents (From Shopify Editions skateboard & bag) */
+  --neon-magenta:       #ff007f;   /* Electric pop magenta */
+  --neon-magenta-glow:  rgba(255, 0, 127, 0.4);
+  --neon-magenta-subtle: rgba(255, 0, 127, 0.12);
+  --red:                #ff007f;   /* Set primary accent to neon magenta */
+  --red-hi:             #ff3399;
+  --red-lo:             #cc0066;
+  --red-plate:          rgba(255, 0, 127, 0.08);
+  --crimson:            #ff007f;
+  --accent:             var(--neon-magenta);
+  --accent-bg:          rgba(255, 0, 127, 0.08);
+  --accent-border:      rgba(255, 0, 127, 0.35);
 
-  /* Refined cyber emerald for status indicator */
-  --term-green:  #10B981;
+  /* Classical Renaissance Gilded Gold */
+  --antique-gold:       #d4af37;
+  --antique-gold-glow:  rgba(212, 175, 55, 0.35);
+  --antique-gold-subtle: rgba(212, 175, 55, 0.12);
+  --amber:              #d4af37;
+  --term-green:         #10b981;
 
-  /* Amber — pending / warning states */
-  --amber:       #FFB400;
-  --amber-lo:    #996B00;
+  /* Shadows & Atmospheric Fog */
+  --shadow:      rgba(0, 0, 0, 0.75);
+  --social-bg:   rgba(255, 255, 255, 0.025);
 
-  /* Shadows & socials */
-  --shadow:      rgba(0, 0, 0, 0.5);
-  --social-bg:   rgba(255, 255, 255, 0.04);
-
-  /* Typography */
-  --font-display: 'Archivo Black', sans-serif;   /* UPPERCASE structural headers */
-  --font-mono:    'JetBrains Mono', monospace;   /* all data/meta/nav */
-  --font-body:    'DM Sans', system-ui, sans-serif;
+  /* High-Fashion Renaissance Typography */
+  --font-serif:   'Cormorant Garamond', Georgia, serif;
+  --font-cinzel:  'Cinzel', serif;
+  --font-display: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --font-body:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Spacing */
   --sp-1:   4px;
@@ -78,11 +84,12 @@ img { display: block; max-width: 100%; }
   --sp-24: 96px;
   --sp-32: 128px;
 
-  /* Industrial: subtle rounding on structural elements */
+  /* Refined Luxury Radii */
   --r-none: 0px;
-  --r-sm:   3px;   /* status badges */
-  --r-md:   6px;   /* cards & containers */
-  --r-pill: 9999px; /* interactive buttons */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   14px;
+  --r-pill: 9999px;
 }
 
 /* ── BASE ─────────────────────────────────────────────────── */
@@ -90,37 +97,15 @@ body {
   background: var(--void);
   color: var(--phosphor);
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── GRAIN OVERLAY (fixed, pointer-events-none, z-top) ─────── */
-/* Per skill: grain must be on FIXED element, never scrolling container */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  pointer-events: none;
-  opacity: 0.4;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-}
-
-/* ── CRT SCANLINE EFFECT (fixed overlay) ───────────────────── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9997;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.06) 2px,
-    rgba(0, 0, 0, 0.06) 4px
-  );
+/* Minimalist luxury: clean slate without harsh CRT scanlines */
+body::before, body::after {
+  display: none !important;
 }
 
 /* ── LAYOUT ─────────────────────────────────────────────────── */
@@ -129,6 +114,408 @@ body::after {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 var(--sp-6);
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
+/* Responsive Grid Utilities */
+.grid-responsive-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1024px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .grid-responsive-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-responsive-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1024px) {
+  .grid-responsive-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .grid-responsive-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-responsive-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .grid-responsive-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Touch & Momentum Scrolling Utilities */
+.table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile full-width helper */
+.mobile-w-full {
+  width: auto;
+}
+@media (max-width: 640px) {
+  .mobile-w-full {
+    width: 100% !important;
+  }
+}
+
+/* ── RENAISSANCE EDITION STYLES (SHOPIFY EDITIONS INSPIRED) ──── */
+.renaissance-hero-stage {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-image: url('/renaissance_hero.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justifyContent: center;
+  padding: 120px 24px 80px;
+  overflow: hidden;
+}
+
+.renaissance-hero-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(10, 13, 12, 0.25) 0%, rgba(10, 13, 12, 0.85) 100%),
+              linear-gradient(180deg, rgba(10, 13, 12, 0.4) 0%, rgba(10, 13, 12, 0.95) 100%);
+  pointer-events: none;
+}
+
+/* Floating Glass Index Card (Shopify Editions Core Icon) */
+.renaissance-index-card {
+  position: relative;
+  z-index: 10;
+  max-width: 480px;
+  width: 100%;
+  background: rgba(15, 18, 17, 0.75);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(244, 241, 234, 0.16);
+  border-radius: 12px;
+  padding: 40px 36px 32px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: var(--phosphor);
+  animation: cardFloat 6s ease-in-out infinite alternate;
+}
+
+@keyframes cardFloat {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-8px); }
+}
+
+.renaissance-card-the {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ghost);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.renaissance-card-title {
+  font-family: var(--font-cinzel);
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.renaissance-card-title .slashes {
+  color: var(--neon-magenta);
+  font-family: var(--font-mono);
+  letter-spacing: -0.08em;
+  text-shadow: 0 0 16px var(--neon-magenta-glow);
+}
+
+.renaissance-card-edition {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--antique-gold);
+  margin-bottom: 24px;
+}
+
+.renaissance-card-desc {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ghost);
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(244, 241, 234, 0.1);
+  padding-bottom: 20px;
+}
+
+.renaissance-chapter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--phosphor);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(244, 241, 234, 0.04);
+  transition: all 0.2s ease;
+}
+
+.renaissance-chapter-row:hover {
+  color: var(--neon-magenta);
+  transform: translateX(4px);
+}
+
+.renaissance-chapter-row .num {
+  font-family: var(--font-cinzel);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--antique-gold);
+  letter-spacing: 0.08em;
+}
+
+/* ── SPLIT STAGE LAYOUT (POST-HERO) ────────────────────────── */
+.renaissance-split-wrapper {
+  background: var(--void);
+  border-top: 1px solid rgba(244, 241, 234, 0.08);
+  padding: 80px 0 140px;
+  position: relative;
+}
+
+.renaissance-split-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .renaissance-split-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.renaissance-sticky-sidebar {
+  position: sticky;
+  top: 96px;
+  padding-right: 20px;
+}
+
+@media (max-width: 960px) {
+  .renaissance-sticky-sidebar {
+    position: static;
+    border-bottom: 1px solid rgba(244, 241, 234, 0.08);
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+}
+
+.sidebar-title {
+  font-family: var(--font-cinzel);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.sidebar-sub {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--neon-magenta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--ghost);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+}
+
+.sidebar-nav-item:hover, .sidebar-nav-item.active {
+  background: rgba(244, 241, 234, 0.06);
+  color: #ffffff;
+}
+
+.sidebar-nav-item.active {
+  border-left: 2px solid var(--neon-magenta);
+}
+
+.sidebar-nav-item.active .side-num {
+  color: var(--neon-magenta);
+}
+
+.side-num {
+  font-family: var(--font-cinzel);
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--antique-gold);
+}
+
+/* ── INTERACTIVE HOTSPOT TARGETS (SHOPIFY EDITIONS SIGNATURE) ── */
+.editorial-hotspot-anchor {
+  position: absolute;
+  z-index: 25;
+  transform: translate(-50%, -50%);
+}
+
+.editorial-hotspot-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 0, 127, 0.3);
+  border: 1.5px solid var(--neon-magenta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.editorial-hotspot-dot:hover {
+  transform: scale(1.18);
+  background: var(--neon-magenta);
+  box-shadow: 0 0 20px var(--neon-magenta-glow);
+}
+
+.editorial-hotspot-dot::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--neon-magenta);
+  animation: hotspotRipple 2.2s cubic-bezier(0.1, 0.5, 0.4, 1) infinite;
+}
+
+@keyframes hotspotRipple {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.editorial-hotspot-popover {
+  position: absolute;
+  bottom: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  background: rgba(18, 22, 20, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 241, 234, 0.16);
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 12px var(--neon-magenta-subtle);
+  pointer-events: auto;
+  z-index: 30;
+}
+
+/* ── CHAPTER SECTION CONTAINERS ────────────────────────────── */
+.renaissance-chapter-section {
+  scroll-margin-top: 110px;
+  margin-bottom: 96px;
+  background: var(--plate);
+  border: 1px solid rgba(244, 241, 234, 0.08);
+  border-radius: 12px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .renaissance-chapter-section {
+    padding: 24px;
+  }
+}
+
+.chapter-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-cinzel);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--antique-gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.chapter-h2 {
+  font-family: var(--font-cinzel);
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.chapter-desc {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--ghost);
+  max-width: 620px;
+  line-height: 1.6;
+  margin-bottom: 32px;
 }
 
 /* ── INDUSTRIAL & CYBER CARDS ────────────────────────────────── */
@@ -193,22 +580,21 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  background: rgba(12, 12, 14, 0.92);
+  padding: 8px 18px;
+  background: rgba(10, 11, 16, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-pill);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
-  /* Inner highlight — per high-end-visual-design double-bezel */
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    0 12px 36px rgba(0,0,0,0.7);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 44px rgba(0, 0, 0, 0.75);
 }
 
 .navbar-logo {
   font-family: var(--font-display);
   font-size: 0.9375rem;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.22em;
   color: var(--phosphor);
   text-transform: uppercase;
   display: flex;
@@ -249,28 +635,27 @@ body::after {
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex-shrink: 1;
 }
 
-/* Per industrial-brutalist: all nav in uppercase monospace */
+/* Modern luxury nav typography */
 .navbar-link {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--ghost);
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: var(--r-pill);
-  transition: color 0.2s, background 0.15s;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .navbar-link:hover,
 .navbar-link.active {
-  color: var(--phosphor);
-  background: rgba(255,255,255,0.05);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .navbar-cta-area {
@@ -280,55 +665,69 @@ body::after {
 }
 
 /* ── BUTTONS ─────────────────────────────────────────────────── */
-/* Per high-end-visual-design: pill shape, button-in-button trailing icon */
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--sp-2);
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  border-radius: var(--r-pill);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  border-radius: var(--r-md);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
-/* Active tactile press per high-end-visual-design */
-.btn:active { transform: scale(0.97) translateY(1px); }
+.btn:active { transform: scale(0.98); }
 
-.btn-sm  { padding: 7px 16px; font-size: 0.625rem; }
-.btn-md  { padding: 10px 22px; }
-.btn-lg  { padding: 13px 28px; font-size: 0.75rem; }
+.btn-sm  { padding: 6px 14px; font-size: 0.6875rem; border-radius: var(--r-sm); }
+.btn-md  { padding: 10px 20px; font-size: 0.8125rem; }
+.btn-lg  { padding: 13px 26px; font-size: 0.875rem; }
 
-/* Primary: red fill, white text — WCAG AA guaranteed */
+/* Primary: luxury rose-crimson gradient */
 .btn-primary {
-  background: var(--red);
+  background: linear-gradient(135deg, var(--red-hi), var(--red));
   color: #fff;
-  border: 1px solid var(--red);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 18px rgba(225, 29, 72, 0.35);
 }
-.btn-primary:hover { background: var(--red-hi); border-color: var(--red-hi); }
+.btn-primary:hover {
+  background: linear-gradient(135deg, #fb7185, var(--red-hi));
+  box-shadow: 0 6px 24px rgba(225, 29, 72, 0.5);
+  transform: translateY(-1px);
+}
 
-/* Ghost: transparent with seam border */
+/* Ghost: transparent with subtle hairline border */
 .btn-ghost {
-  background: transparent;
-  color: var(--ghost);
-  border: 1px solid var(--seam);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--phosphor);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
-.btn-ghost:hover { color: var(--phosphor); border-color: var(--structure); background: rgba(255,255,255,0.03); }
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
 
-/* Industrial: sharp corners, thick red border — structural CTA */
+/* Industrial: refined obsidian border CTA */
 .btn-industrial {
-  background: transparent;
-  color: var(--red);
-  border: 1px solid var(--red-lo);
-  border-radius: var(--r-none);
-  letter-spacing: 0.2em;
-  padding: 11px 28px;
-  font-size: 0.6875rem;
+  background: rgba(225, 29, 72, 0.06);
+  color: #fff;
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  border-radius: var(--r-md);
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 10px 22px;
+  font-size: 0.75rem;
+}
+.btn-industrial:hover {
+  background: rgba(225, 29, 72, 0.15);
+  border-color: var(--red);
+  box-shadow: 0 0 20px rgba(225, 29, 72, 0.25);
 }
 .btn-industrial:hover { background: var(--red-plate); border-color: var(--red); color: var(--red-hi); }
 
@@ -639,7 +1038,7 @@ body::after {
 
 .artwork-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 1px;
   background: var(--seam);
 }
@@ -1141,6 +1540,8 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   font-family: var(--font-mono);
   font-size: 0.5rem;
   color: var(--dead);
@@ -4190,3 +4591,257 @@ body::after {
   border-color: #fbbf24;
   background: rgba(251, 191, 36, 0.05);
 }
+
+/* ================================================================
+   RENAISSANCE EDITION — UNIVERSAL SHARED DESIGN PRIMITIVES
+   High-art editorial styling, frosted glass cards, antique gold,
+   neon magenta, and classical Roman typography.
+   ================================================================ */
+.renaissance-page-header {
+  padding-top: var(--sp-10);
+  padding-bottom: var(--sp-6);
+  border-bottom: 1px solid rgba(244, 241, 234, 0.08);
+  background: linear-gradient(180deg, rgba(10, 13, 12, 0.95) 0%, rgba(14, 18, 17, 0.6) 100%);
+  margin-bottom: var(--sp-8);
+}
+
+.renaissance-chapter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--antique-gold);
+  margin-bottom: 8px;
+}
+
+.renaissance-title {
+  font-family: var(--font-cinzel);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  color: var(--phosphor);
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  margin: 0 0 8px 0;
+}
+
+.renaissance-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--ghost);
+  line-height: 1.6;
+  max-width: 640px;
+  margin: 0;
+}
+
+.renaissance-glass-panel {
+  background: rgba(14, 18, 17, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 241, 234, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.renaissance-glass-panel:hover {
+  border-color: rgba(244, 241, 234, 0.16);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.renaissance-pill {
+  padding: 8px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  cursor: pointer;
+  background: rgba(244, 241, 234, 0.03);
+  color: var(--ghost);
+  border: 1px solid rgba(244, 241, 234, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.renaissance-pill:hover,
+.renaissance-pill.active {
+  background: rgba(255, 0, 127, 0.12);
+  color: var(--phosphor);
+  border-color: var(--neon-magenta);
+  box-shadow: 0 0 16px rgba(255, 0, 127, 0.25);
+}
+
+.renaissance-btn-primary {
+  background: var(--neon-magenta);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(255, 0, 127, 0.35);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.renaissance-btn-primary:hover {
+  background: #ff1a8c;
+  box-shadow: 0 6px 28px rgba(255, 0, 127, 0.55);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.renaissance-btn-gold {
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--antique-gold);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.renaissance-btn-gold:hover {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: var(--antique-gold);
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.25);
+  color: #ffffff;
+}
+
+.renaissance-stat-card {
+  background: rgba(14, 18, 17, 0.5);
+  border: 1px solid rgba(244, 241, 234, 0.06);
+  border-radius: 8px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.renaissance-stat-num {
+  font-family: var(--font-cinzel);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--phosphor);
+  line-height: 1;
+}
+
+.renaissance-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--ghost);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── RENAISSANCE RESPONSIVE OVERRIDES ────────────────────────── */
+@media (max-width: 1024px) {
+  .renaissance-page-header {
+    padding-top: 88px;
+    padding-bottom: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .renaissance-hero-stage {
+    padding: 88px 16px 40px;
+    min-height: auto;
+  }
+  .renaissance-index-card {
+    padding: 24px 18px 20px;
+    border-radius: 10px;
+    max-width: 100%;
+  }
+  .renaissance-card-title {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
+  }
+  .renaissance-card-desc {
+    font-size: 0.8125rem;
+    margin-bottom: 20px;
+  }
+  .renaissance-chapter-row {
+    padding: 10px 0;
+    font-size: 0.8125rem;
+  }
+  .renaissance-page-header {
+    padding: 84px 0 24px !important;
+    margin-bottom: 20px !important;
+  }
+  .renaissance-title {
+    font-size: clamp(1.75rem, 7vw, 2.3rem) !important;
+    line-height: 1.1 !important;
+  }
+  .renaissance-subtitle {
+    font-size: 0.8125rem !important;
+    line-height: 1.5 !important;
+  }
+  .renaissance-glass-panel {
+    padding: 18px 14px !important;
+    border-radius: 8px !important;
+  }
+  .renaissance-stat-card {
+    padding: 16px 14px !important;
+  }
+  .renaissance-stat-num {
+    font-size: 1.4rem !important;
+  }
+  .renaissance-btn-primary,
+  .renaissance-btn-gold {
+    padding: 10px 16px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ── ARTWORK DETAIL RESPONSIVE LAYOUT ───────────────────────── */
+.artwork-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--seam);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .artwork-detail-layout {
+    grid-template-columns: 1fr 400px;
+  }
+}
+
+.artwork-detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  position: static;
+}
+
+@media (min-width: 1024px) {
+  .artwork-detail-sidebar {
+    position: sticky;
+    top: 80px;
+  }
+}
+

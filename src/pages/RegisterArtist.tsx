@@ -181,7 +181,7 @@ export function RegisterArtist() {
               <div className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 'var(--sp-4)' }}>
                 <Palette size={10} weight="bold" />Primary Specialization *
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: 'var(--seam)' }}>
+              <div className="grid-responsive-3" style={{ gap: '1px', background: 'var(--seam)' }}>
                 {SPECIALIZATIONS.map((s) => (
                   <button
                     key={s}

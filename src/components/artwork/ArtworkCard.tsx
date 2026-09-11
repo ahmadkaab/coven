@@ -39,6 +39,16 @@ export function ArtworkCard({ artwork, variant = 'default' }: ArtworkCardProps) 
         <div className="artwork-badge-row" style={{ gap: '1px' }}>
           {badge()}
           {isAuction && <span className="badge badge-live">LIVE</span>}
+          {artwork.is_blind && !artwork.revealed && (
+            <span className="badge" style={{ background: 'rgba(230, 25, 25, 0.15)', color: 'var(--crimson)', border: '1px solid rgba(230, 25, 25, 0.35)' }}>
+              BLIND
+            </span>
+          )}
+          {artwork.is_pinned && (
+            <span className="badge" style={{ background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.35)' }}>
+              ⭐ PINNED
+            </span>
+          )}
           {artwork.is_nsfw && (
             <span className="badge" style={{ background: 'var(--hull)', color: 'var(--shadow-type)' }}>18+</span>
           )}
@@ -50,8 +60,10 @@ export function ArtworkCard({ artwork, variant = 'default' }: ArtworkCardProps) 
         <div className="artwork-title" style={{ textWrap: 'balance' } as React.CSSProperties}>
           {artwork.title}
         </div>
-        <div className="artwork-artist">
-          {artwork.artist?.username ?? 'Unknown Artist'}
+        <div className="artwork-artist" style={{ color: artwork.is_blind && !artwork.revealed ? 'var(--crimson)' : undefined }}>
+          {artwork.is_blind && !artwork.revealed 
+            ? (artwork.blind_cipher || 'Masked Artisan') 
+            : (artwork.artist?.username ?? 'Independent Artist')}
         </div>
         {artwork.description && (
           <p style={{
@@ -63,7 +75,7 @@ export function ArtworkCard({ artwork, variant = 'default' }: ArtworkCardProps) 
             {artwork.description}
           </p>
         )}
-        {artwork.artist && (
+        {!artwork.is_blind && artwork.artist && (
           <div style={{ marginBottom: '12px' }}>
             <StarRating rating={artwork.artist.average_rating ?? 0} count={artwork.artist.total_reviews ?? 0} />
           </div>
@@ -81,16 +93,38 @@ export function ArtworkCard({ artwork, variant = 'default' }: ArtworkCardProps) 
           ) : (
             <>
               <div className="artwork-price-label">Price</div>
-              <div className="artwork-price">
-                {artwork.price_torn != null ? `$${artwork.price_torn.toLocaleString()}` : 'Open'}
+              <div className="artwork-price" style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                {artwork.price_cr != null ? (
+                  <>
+                    <span>{artwork.price_cr.toLocaleString()} CR</span>
+                    <span style={{ fontSize: '0.6875rem', color: 'var(--antique-gold)', fontWeight: 400 }}>
+                      ({(artwork.price_cr / 1000).toLocaleString()} XAN)
+                    </span>
+                  </>
+                ) : artwork.price_torn != null ? (
+                  `$${artwork.price_torn.toLocaleString()}`
+                ) : (
+                  'Open'
+                )}
               </div>
             </>
           )}
         </div>
-        {isAuction && artwork.current_bid != null && (
+        {isAuction && (artwork.current_bid_cr != null || artwork.current_bid != null) && (
           <div style={{ textAlign: 'right' }}>
             <div className="artwork-price-label">Top bid</div>
-            <div className="artwork-price">${artwork.current_bid.toLocaleString()}</div>
+            <div className="artwork-price" style={{ color: 'var(--neon-magenta)', display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', gap: '6px' }}>
+              {artwork.current_bid_cr != null ? (
+                <>
+                  <span>{artwork.current_bid_cr.toLocaleString()} CR</span>
+                  <span style={{ fontSize: '0.6875rem', color: 'var(--antique-gold)', fontWeight: 400 }}>
+                    ({(artwork.current_bid_cr / 1000).toLocaleString()} XAN)
+                  </span>
+                </>
+              ) : (
+                `$${artwork.current_bid?.toLocaleString()}`
+              )}
+            </div>
           </div>
         )}
         {artwork.tags && artwork.tags.length > 0 && (

@@ -24,6 +24,7 @@ import {
 import { useAuthStore } from '../store/authStore';
 import { getCollectorProfile, getFollowedArtistIds } from '../services/followService';
 import { getSyndicateProgression } from '../services/achievementService';
+import { AvatarWithFrame } from '../components/common/AvatarWithFrame';
 import { SEED_ARTISTS, SEED_ARTWORKS } from '../data/seed';
 import { formatTornCash, timeAgo } from '../utils/format';
 import { useToast } from '../context/ToastContext';
@@ -86,15 +87,15 @@ export function CollectorProfile() {
       {/* ── HERO DOSSIER COMPARTMENT ──────────────────────────── */}
       <div className="container">
         <div className="collector-hero-card">
-          {/* Avatar with faction frame & cosmetic underworld frame */}
-          <div className="collector-avatar-wrap">
-            <img
-              src={profile.avatar_url}
-              alt={profile.username}
-              className={`collector-avatar-img ${progression.equippedFrame?.cssClass || 'frame-operative'}`}
-            />
-            <span className="collector-level-tag">LVL {progression.level}</span>
-          </div>
+          {/* Avatar with vanity cosmetic frame & level badge */}
+          <AvatarWithFrame
+            size="lg"
+            avatarUrl={profile.avatar_url}
+            frame={progression.equippedFrame}
+            level={progression.level}
+            showLevel
+            alt={profile.username}
+          />
 
           {/* Profile Details */}
           <div className="collector-hero-info">

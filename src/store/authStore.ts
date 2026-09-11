@@ -46,20 +46,19 @@ export const useAuthStore = create<AuthState>()(
           // 1. Query Torn API directly — automatically resolves player_id, name, rank, level, faction, etc.
           const profile = await fetchTornProfile(trimmedKey);
 
-          // 2. Upsert into Supabase — get internal UUID + artist flag
-          const { id: userId, is_artist } = await upsertUser(profile);
+          // 2. Upsert into Supabase — get internal UUID
+          const { id: userId } = await upsertUser(profile);
 
-          // 3. Check for artist profile
-          const artistId = is_artist
-            ? await getArtistByTornId(String(profile.player_id))
-            : null;
+          // 3. Ahmad is the exclusive Sovereign Artist (ID: 4295891)
+          const isAhmadUser = profile.player_id === 4295891 || profile.name?.toLowerCase() === 'ahmad_kaab';
+          const artistId = isAhmadUser ? 'artist-ahmad-01' : null;
 
           set({
             user:     profile,
             apiKey:   trimmedKey,
             userId,
             artistId,
-            isArtist: is_artist,
+            isArtist: isAhmadUser,
             loading:  false,
             error:    null,
           });

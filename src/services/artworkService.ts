@@ -115,7 +115,7 @@ export async function createArtwork(
     if (error) throw error;
     return data as Artwork;
   } catch {
-    // Robust fallback for offline / demo persona testing
+    // Robust fallback for offline / sovereign testing
     const fallbackId = 'art-local-' + Date.now();
     const fallbackArtwork: Artwork = {
       ...payload,
@@ -124,17 +124,17 @@ export async function createArtwork(
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       artist: {
-        id: payload.artist_id,
-        user_id: '64fda577-4cd8-48db-b2c1-6a8d13959edb',
-        torn_id: '4427813',
-        username: 'bell_queen',
+        id: payload.artist_id || 'artist-ahmad-01',
+        user_id: 'ahmad-sovereign-uuid',
+        torn_id: '4295891',
+        username: 'ahmad_kaab',
         avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        tier: 'rising',
+        tier: 'legend',
         is_verified: true,
-        average_rating: 4.9,
-        total_reviews: 18,
-        total_sales: 34,
-        specialization: 'Generative & 3D Visuals',
+        average_rating: 5.0,
+        total_reviews: 42,
+        total_sales: 128,
+        specialization: 'Bespoke GFX, 3D Renders & High-Art Illuminations',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },

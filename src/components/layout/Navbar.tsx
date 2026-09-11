@@ -1,10 +1,17 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { List, X, User, MagnifyingGlass, Bell, BellRinging, CheckCircle, ArrowRight, Chats } from '@phosphor-icons/react';
+import { List, X, User, MagnifyingGlass, Bell, BellRinging, CheckCircle, ArrowRight, Chats, Lightning } from '@phosphor-icons/react';
 import { useAuthStore } from '../../store/authStore';
 import { getNotifications, getUnreadCount, markAsRead, markAllRead } from '../../services/notificationService';
 import { getUnreadDispatchCount } from '../../services/dispatchService';
+import { getWallet, convertCreditsToXanax } from '../../services/walletService';
+import { getSyndicateProgression } from '../../services/achievementService';
+import { isUserAdmin } from '../../services/adminService';
+import { CovenLogo } from '../common/CovenLogo';
+import { AvatarWithFrame } from '../common/AvatarWithFrame';
+import type { Wallet } from '../../types';
 import type { Notification } from '../../types/notification';
+import type { SyndicateProgression } from '../../types/achievement';
 
 /* ── Relative time helper ─────────────────────────────────── */
 function relTime(iso: string): string {
@@ -39,7 +46,7 @@ function notifColor(type: Notification['type']): string {
 export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const userId = user ? String(user.player_id) : null;
 
   const [scrolled, setScrolled] = useState(false);
@@ -57,6 +64,15 @@ export function Navbar() {
 
   // Wire / Dispatch state
   const [unreadDispatches, setUnreadDispatches] = useState(0);
+
+  // Syndicate Progression & Vanity state
+  const [progression, setProgression] = useState<SyndicateProgression>(() => getSyndicateProgression());
+
+  useEffect(() => {
+    const handleProgression = () => setProgression(getSyndicateProgression());
+    window.addEventListener('coven:progression_update', handleProgression);
+    return () => window.removeEventListener('coven:progression_update', handleProgression);
+  }, []);
 
   /* Fetch notifications & dispatches */
   const refreshNotifs = useCallback(() => {
@@ -144,15 +160,62 @@ export function Navbar() {
     if (n.link) navigate(n.link);
   };
 
-  const links: { href: string; label: string; live?: boolean; badge?: string }[] = [
-    { href: '/browse', label: 'Browse' },
-    { href: '/artists', label: 'Artists' },
-    { href: '/auctions', label: 'Auctions' },
-    { href: '/commissions', label: 'Commissions' },
-    { href: '/trade', label: 'Trade' },
-    { href: '/achievements', label: 'Accolades' },
-    { href: '/market-pulse', label: 'Pulse', live: true },
-    { href: '/userscript', label: 'Script', badge: 'EXT' },
+  // Escrow Wallet state
+  const [wallet, setWallet] = useState<Wallet | null>(() =>
+    userId ? getWallet(userId, userId) : null
+  );
+
+  useEffect(() => {
+    if (userId) {
+      setWallet(getWallet(userId, userId));
+    } else {
+      setWallet(null);
+    }
+    const handleWallet = () => {
+      if (userId) setWallet(getWallet(userId, userId));
+    };
+    window.addEventListener('coven:wallet_update', handleWallet);
+    return () => window.removeEventListener('coven:wallet_update', handleWallet);
+  }, [userId]);
+
+  const [chaptersOpen, setChaptersOpen] = useState(false);
+  const chaptersRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!chaptersOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (chaptersRef.current && !chaptersRef.current.contains(e.target as Node)) {
+        setChaptersOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [chaptersOpen]);
+
+  const userIsAdmin = isUserAdmin(user);
+  const isAhmad = userIsAdmin || user?.player_id === 4295891 || user?.name === 'ahmad_kaab';
+
+  const chapters = [
+    { num: 'I', label: 'Marketplace', href: '/#chapter-1' },
+    { num: 'II', label: 'Blind Auctions', href: '/#chapter-2' },
+    { num: 'III', label: 'Wallet & Escrow', href: '/#chapter-3' },
+    { num: 'IV', label: 'Ahmad Kaab (Artist)', href: '/#chapter-4' },
+    { num: 'V', label: 'Achievements', href: '/#chapter-5' },
+    ...(isAhmad ? [{ num: 'VI', label: 'Admin Console', href: '/#chapter-6' }] : []),
+  ];
+
+  const links: { href: string; label: string; live?: boolean; badge?: string }[] = isAhmad ? [
+    { href: '/browse', label: 'Marketplace' },
+    { href: '/auctions', label: 'Blind Auctions', badge: 'BLIND' },
+    { href: '/wallet', label: 'Wallet & Escrow' },
+    { href: '/studio', label: 'Ahmad Studio', badge: 'ARTIST' },
+    { href: '/admin', label: 'Admin Console', badge: 'ADMIN' },
+  ] : [
+    { href: '/browse', label: 'Marketplace' },
+    { href: '/commissions', label: 'Commission Ahmad', badge: 'CUSTOM' },
+    { href: '/auctions', label: 'Blind Auctions', badge: 'BLIND' },
+    { href: '/wallet', label: 'Wallet & Escrow' },
+    { href: '/dashboard', label: 'My Account' },
   ];
 
   return (
@@ -167,11 +230,114 @@ export function Navbar() {
             transition: 'box-shadow 0.4s',
           }}
         >
-          {/* Logo */}
-          <Link to="/" className="navbar-logo">
-            <span className="navbar-logo-mark" aria-hidden="true" />
-            COVEN
-          </Link>
+          {/* ── DESKTOP CONTENT (>= 1025px) ── */}
+          <div className="navbar-desktop-only">
+          {/* Bespoke Logo + Edition Pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CovenLogo size="sm" />
+            <span style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.5625rem',
+              color: 'var(--neon-magenta)',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              background: 'rgba(255, 0, 127, 0.08)',
+              border: '1px solid rgba(255, 0, 127, 0.28)',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.2
+            }}>
+              'WINTER 26
+            </span>
+          </div>
+
+          {/* Chapters Dropdown Trigger */}
+          <div ref={chaptersRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setChaptersOpen(!chaptersOpen)}
+              className="navbar-link"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontFamily: 'var(--font-cinzel)',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                color: chaptersOpen ? 'var(--neon-magenta)' : 'var(--phosphor)',
+                padding: '4px 10px',
+                background: 'rgba(244, 241, 234, 0.04)',
+                border: '1px solid rgba(244, 241, 234, 0.08)',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Chapters ▾
+            </button>
+
+            {chaptersOpen && (
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 12px)',
+                left: 0,
+                width: '240px',
+                background: 'rgba(16, 20, 18, 0.95)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: '1px solid rgba(244, 241, 234, 0.14)',
+                borderRadius: '8px',
+                padding: '8px',
+                boxShadow: '0 20px 48px rgba(0, 0, 0, 0.85)',
+                zIndex: 100
+              }}>
+                <div style={{
+                  fontSize: '0.5625rem',
+                  fontFamily: 'var(--font-mono)',
+                  color: 'var(--ghost)',
+                  padding: '6px 10px',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  borderBottom: '1px solid rgba(244, 241, 234, 0.06)',
+                  marginBottom: '4px'
+                }}>
+                  THE RENAISSANCE EDITION
+                </div>
+                {chapters.map(c => (
+                  <a
+                    key={c.num}
+                    href={c.href}
+                    onClick={() => setChaptersOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 10px',
+                      borderRadius: '5px',
+                      fontSize: '0.75rem',
+                      fontFamily: 'var(--font-body)',
+                      color: 'var(--phosphor)',
+                      textDecoration: 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(244, 241, 234, 0.08)';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--neon-magenta)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--phosphor)';
+                    }}
+                  >
+                    <span>{c.label}</span>
+                    <span style={{ fontFamily: 'var(--font-cinzel)', fontWeight: 700, color: 'var(--antique-gold)', fontSize: '0.6875rem' }}>
+                      {c.num}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Center links */}
           <div className="navbar-links">
@@ -189,8 +355,8 @@ export function Navbar() {
                       width: '5px',
                       height: '5px',
                       borderRadius: '50%',
-                      background: 'var(--term-green)',
-                      boxShadow: '0 0 6px var(--term-green)',
+                      background: 'var(--neon-magenta)',
+                      boxShadow: '0 0 6px var(--neon-magenta)',
                       display: 'inline-block',
                     }}
                   />
@@ -200,9 +366,9 @@ export function Navbar() {
                     style={{
                       fontSize: '0.5rem',
                       fontFamily: 'var(--font-mono)',
-                      background: 'rgba(230, 25, 25, 0.15)',
-                      color: 'var(--crimson)',
-                      border: '1px solid rgba(230, 25, 25, 0.35)',
+                      background: 'rgba(255, 0, 127, 0.12)',
+                      color: 'var(--neon-magenta)',
+                      border: '1px solid rgba(255, 0, 127, 0.3)',
                       padding: '1px 4px',
                       borderRadius: '3px',
                       letterSpacing: '0.04em',
@@ -218,6 +384,23 @@ export function Navbar() {
 
           {/* Right CTAs */}
           <div className="navbar-cta-area" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Real-time Escrow Peg Badge */}
+            <span style={{
+              fontSize: '0.625rem',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--antique-gold)',
+              background: 'rgba(212, 175, 55, 0.08)',
+              border: '1px solid rgba(212, 175, 55, 0.25)',
+              padding: '3px 8px',
+              borderRadius: '4px',
+              letterSpacing: '0.04em',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--antique-gold)' }} />
+              1 XAN = 1K CR
+            </span>
             {searchOpen ? (
               <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
                 <input
@@ -379,22 +562,100 @@ export function Navbar() {
 
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                {wallet && (
+                  <Link
+                    to="/wallet"
+                    className="btn btn-sm"
+                    style={{
+                      background: 'rgba(230, 25, 25, 0.08)',
+                      border: '1px solid rgba(230, 25, 25, 0.35)',
+                      color: 'var(--phosphor)',
+                      fontSize: '0.625rem',
+                      fontFamily: 'var(--font-mono)',
+                      padding: '4px 10px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      letterSpacing: '0.04em',
+                      borderRadius: '2px',
+                    }}
+                    title={`Available: ${wallet.balance_cr.toLocaleString()} CR (~${(wallet.balance_cr / 1000).toFixed(1)} Xanax)`}
+                  >
+                    <Lightning size={12} weight="fill" style={{ color: 'var(--crimson)' }} />
+                    <span style={{ fontWeight: 600 }}>{wallet.balance_cr.toLocaleString()} CR</span>
+                  </Link>
+                )}
+
+                {/* Equipped Prestige Title Flair */}
+                {progression.equippedTitle && (
+                  <Link
+                    to="/achievements"
+                    title={`Equipped Title: ${progression.equippedTitle.name} (${progression.equippedTitle.bonusPerk})`}
+                    className={`syndicate-title-flair ${progression.equippedTitle.id.replace('title_', 'title-')}`}
+                    style={{
+                      fontSize: '0.5625rem',
+                      padding: '3px 7px',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {progression.equippedTitle.tag}
+                  </Link>
+                )}
+
+                {/* Equipped Avatar Frame & Link to Dossier */}
                 <Link
                   to={`/collector/${userId}`}
-                  className="btn btn-sm btn-ghost"
-                  style={{ gap: '4px', fontSize: '0.625rem', padding: '5px 12px', flexShrink: 0, whiteSpace: 'nowrap' }}
-                  title="View Public Syndicate Collector Dossier"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    marginLeft: '2px',
+                  }}
+                  title={`View Dossier: ${user.name} (LVL ${progression.level})`}
                 >
-                  <User size={12} weight="bold" />
-                  Dossier
+                  <AvatarWithFrame
+                    size="xs"
+                    avatarUrl={user.profile_image}
+                    frame={progression.equippedFrame}
+                    alt={user.name}
+                  />
                 </Link>
-                <Link
-                  to="/dashboard"
-                  className="btn btn-sm btn-ghost"
-                  style={{ fontSize: '0.625rem', padding: '5px 12px', flexShrink: 0, whiteSpace: 'nowrap' }}
-                >
-                  Account
-                </Link>
+
+                {isAhmad ? (
+                  <>
+                    <Link
+                      to="/studio"
+                      className="btn btn-sm btn-ghost"
+                      style={{ fontSize: '0.625rem', padding: '5px 10px', flexShrink: 0, whiteSpace: 'nowrap', color: 'var(--antique-gold)', borderColor: 'rgba(212, 175, 55, 0.4)' }}
+                    >
+                      Ahmad Studio
+                    </Link>
+                    <Link
+                      to="/admin"
+                      className="btn btn-sm btn-ghost"
+                      style={{ fontSize: '0.625rem', padding: '5px 10px', flexShrink: 0, whiteSpace: 'nowrap', color: 'var(--neon-magenta)', borderColor: 'rgba(255, 0, 127, 0.4)' }}
+                    >
+                      Admin
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/commissions"
+                      className="renaissance-btn-gold"
+                      style={{ fontSize: '0.625rem', padding: '4px 10px', flexShrink: 0, whiteSpace: 'nowrap', textDecoration: 'none' }}
+                    >
+                      Commission Ahmad
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      className="btn btn-sm btn-ghost"
+                      style={{ fontSize: '0.625rem', padding: '5px 10px', flexShrink: 0, whiteSpace: 'nowrap' }}
+                    >
+                      My Account
+                    </Link>
+                  </>
+                )}
               </div>
             ) : (
               <>
@@ -403,92 +664,398 @@ export function Navbar() {
               </>
             )}
 
-            {/* Mobile hamburger */}
-            <button
-              className="navbar-link"
-              style={{ display: 'none', padding: '6px 10px' }}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              id="navbar-mobile-toggle"
-            >
-              {mobileOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
-            </button>
+            </div>
+          </div>
+
+          {/* ── MOBILE BAR (< 1025px) ── */}
+          <div className="navbar-mobile-bar">
+            {/* Left: Brand Logo + Edition */}
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+              <CovenLogo size="sm" />
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.5625rem',
+                color: 'var(--neon-magenta)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                background: 'rgba(255, 0, 127, 0.08)',
+                border: '1px solid rgba(255, 0, 127, 0.28)',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.2
+              }}>
+                'W26
+              </span>
+            </Link>
+
+            {/* Right: Balance + Notification + Hamburger */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {wallet && (
+                <Link
+                  to="/wallet"
+                  style={{
+                    background: 'rgba(255, 0, 127, 0.08)',
+                    border: '1px solid rgba(255, 0, 127, 0.28)',
+                    color: 'var(--phosphor)',
+                    fontSize: '0.625rem',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '5px 8px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    borderRadius: '4px',
+                    textDecoration: 'none',
+                    fontWeight: 600
+                  }}
+                  title="Treasury Escrow Balance"
+                >
+                  <Lightning size={12} weight="fill" color="var(--neon-magenta)" />
+                  <span>{wallet.balance_cr.toLocaleString()} CR</span>
+                </Link>
+              )}
+
+              {user && unread > 0 && (
+                <Link
+                  to="/notifications"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    background: 'rgba(255,0,127,0.12)',
+                    color: 'var(--neon-magenta)'
+                  }}
+                  aria-label="Notifications"
+                >
+                  <BellRinging size={15} weight="fill" />
+                </Link>
+              )}
+
+              {/* Hamburger Button (Min 44x44px Touch Target) */}
+              <button
+                type="button"
+                className="mobile-hamburger-btn"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open Navigation Menu"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '6px',
+                  background: 'rgba(244, 241, 234, 0.06)',
+                  border: '1px solid rgba(244, 241, 234, 0.12)',
+                  color: 'var(--phosphor)',
+                  cursor: 'pointer'
+                }}
+              >
+                <List size={20} weight="bold" />
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile overlay */}
+      {/* ── RENAISSANCE MOBILE NAVIGATION DRAWER ── */}
       {mobileOpen && (
         <div
+          className="renaissance-mobile-drawer"
           style={{
-            position: 'fixed', inset: 0, zIndex: 800,
-            background: 'rgba(8,8,8,0.97)',
-            backdropFilter: 'blur(24px)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'center', gap: '4px',
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(10, 13, 12, 0.98)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            display: 'flex', flexDirection: 'column',
+            overflowY: 'auto',
+            padding: '16px 20px 48px',
           }}
         >
-          {links.map((l, i) => (
-            <Link
-              key={l.href}
-              to={l.href}
-              onClick={() => setMobileOpen(false)}
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2rem, 8vw, 3.5rem)',
+          {/* Drawer Top Bar */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            paddingBottom: '16px', borderBottom: '1px solid rgba(244, 241, 234, 0.08)',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CovenLogo size="sm" />
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.625rem',
+                color: 'var(--neon-magenta)',
+                letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                letterSpacing: '-0.02em',
-                color: isActive(l.href) ? 'var(--red)' : 'var(--ghost)',
-                padding: '8px 24px',
-                animationDelay: `${i * 80}ms`,
+                background: 'rgba(255, 0, 127, 0.08)',
+                border: '1px solid rgba(255, 0, 127, 0.3)',
+                padding: '2px 8px',
+                borderRadius: '4px'
+              }}>
+                THE RENAISSANCE EDITION
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close menu"
+              style={{
+                width: '44px', height: '44px',
+                borderRadius: '50%',
+                background: 'rgba(244, 241, 234, 0.06)',
+                border: '1px solid rgba(244, 241, 234, 0.12)',
+                color: '#ffffff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer'
               }}
             >
-              {l.label}
-            </Link>
-          ))}
-          {user && (
-            <Link
-              to="/dispatches"
-              onClick={() => setMobileOpen(false)}
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2rem, 8vw, 3.5rem)',
-                textTransform: 'uppercase',
-                letterSpacing: '-0.02em',
-                color: isActive('/dispatches') ? 'var(--red)' : 'var(--ghost)',
-                padding: '8px 24px',
-              }}
-            >
-              The Wire {unreadDispatches > 0 ? `[${unreadDispatches}]` : ''}
-            </Link>
+              <X size={20} weight="bold" />
+            </button>
+          </div>
+
+          {/* User Dossier Card */}
+          {user ? (
+            <div style={{
+              background: 'rgba(244, 241, 234, 0.03)',
+              border: '1px solid rgba(244, 241, 234, 0.08)',
+              borderRadius: '8px',
+              padding: '14px 16px',
+              marginBottom: '18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <AvatarWithFrame size="sm" avatarUrl={user.profile_image} frame={progression.equippedFrame} alt={user.name} />
+                <div>
+                  <div style={{ fontFamily: 'var(--font-cinzel)', fontWeight: 700, fontSize: '0.9375rem', color: '#fff' }}>
+                    {user.name}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--ghost)' }}>
+                    Torn ID #{user.player_id} &bull; LVL {user.level}
+                  </div>
+                </div>
+              </div>
+
+              {wallet && (
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: 'var(--font-cinzel)', fontSize: '1rem', color: 'var(--neon-magenta)', fontWeight: 700 }}>
+                    {wallet.balance_cr.toLocaleString()} CR
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--antique-gold)' }}>
+                    ≈ {convertCreditsToXanax(wallet.balance_cr)} Xanax
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="renaissance-btn-primary"
+                style={{ flex: 1, textDecoration: 'none', minHeight: '44px' }}
+              >
+                Authenticate Torn Key
+              </Link>
+            </div>
           )}
-          {user && (
-            <Link
-              to={`/collector/${userId}`}
-              onClick={() => setMobileOpen(false)}
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2rem, 8vw, 3.5rem)',
-                textTransform: 'uppercase',
-                letterSpacing: '-0.02em',
-                color: isActive('/collector') ? 'var(--red)' : 'var(--ghost)',
-                padding: '8px 24px',
-              }}
-            >
-              My Dossier
-            </Link>
+
+          {/* Sovereign Management Links (If Admin / Ahmad) */}
+          {isAhmad && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{
+                fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--antique-gold)',
+                letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px'
+              }}>
+                ◈ SOVEREIGN COMMAND (AHMAD)
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <Link
+                  to="/studio"
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 14px', borderRadius: '6px', minHeight: '44px',
+                    background: 'rgba(212, 175, 55, 0.08)',
+                    border: '1px solid rgba(212, 175, 55, 0.3)',
+                    color: 'var(--antique-gold)',
+                    fontFamily: 'var(--font-cinzel)',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>Ahmad's Artist Studio</span>
+                  <span style={{ fontSize: '0.5625rem', fontFamily: 'var(--font-mono)', background: 'var(--antique-gold)', color: '#000', padding: '2px 6px', borderRadius: '3px' }}>
+                    ARTIST
+                  </span>
+                </Link>
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 14px', borderRadius: '6px', minHeight: '44px',
+                    background: 'rgba(255, 0, 127, 0.06)',
+                    border: '1px solid rgba(255, 0, 127, 0.25)',
+                    color: 'var(--neon-magenta)',
+                    fontFamily: 'var(--font-cinzel)',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>Admin & Treasury Console</span>
+                  <span style={{ fontSize: '0.5625rem', fontFamily: 'var(--font-mono)', background: 'var(--neon-magenta)', color: '#fff', padding: '2px 6px', borderRadius: '3px' }}>
+                    ADMIN
+                  </span>
+                </Link>
+              </div>
+            </div>
           )}
-          <div style={{ marginTop: '40px', display: 'flex', gap: '8px' }}>
-            <Link to="/login" onClick={() => setMobileOpen(false)} className="btn btn-md btn-ghost">Login</Link>
-            <Link to="/login" onClick={() => setMobileOpen(false)} className="btn btn-md btn-primary">Join</Link>
+
+          {/* Primary Navigation Links */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--ghost)',
+              letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px'
+            }}>
+              ◈ ART MARKETPLACE
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {[
+                { label: 'Marketplace (All Artworks)', href: '/browse', badge: 'AVAILABLE' },
+                { label: 'Commission Ahmad Directly', href: '/commissions', badge: 'CUSTOM ⚡', highlight: true },
+                { label: 'Blind Mystery Auctions', href: '/auctions', badge: 'BLIND' },
+                { label: 'Wallet & Xanax Escrow', href: '/wallet', badge: 'ESCROW' },
+                { label: 'My Account & Collection', href: '/dashboard' },
+                { label: 'Player Achievements', href: '/achievements', badge: 'RANKS' },
+                { label: 'Torn City Script (HUD)', href: '/userscript', badge: 'SCRIPT' },
+              ].map(item => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 14px', borderRadius: '6px',
+                    minHeight: '44px',
+                    background: isActive(item.href) ? 'rgba(255, 0, 127, 0.12)' : 'rgba(244, 241, 234, 0.02)',
+                    border: isActive(item.href) ? '1px solid var(--neon-magenta)' : '1px solid rgba(244, 241, 234, 0.05)',
+                    color: item.highlight ? 'var(--neon-magenta)' : '#fff',
+                    fontFamily: 'var(--font-cinzel)',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span style={{
+                      fontSize: '0.5625rem', fontFamily: 'var(--font-mono)',
+                      color: item.highlight ? 'var(--neon-magenta)' : 'var(--antique-gold)',
+                      background: 'rgba(244, 241, 234, 0.05)',
+                      padding: '2px 6px', borderRadius: '3px'
+                    }}>
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Chapters Jump List */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--ghost)',
+              letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px'
+            }}>
+              ◈ CHAPTERS (RENAISSANCE EDITION)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+              {chapters.map(c => (
+                <a
+                  key={c.num}
+                  href={c.href}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 10px', borderRadius: '5px', minHeight: '40px',
+                    background: 'rgba(244, 241, 234, 0.02)',
+                    border: '1px solid rgba(244, 241, 234, 0.06)',
+                    fontSize: '0.6875rem', fontFamily: 'var(--font-body)',
+                    color: 'var(--phosphor)', textDecoration: 'none'
+                  }}
+                >
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.label}</span>
+                  <span style={{ fontFamily: 'var(--font-cinzel)', fontWeight: 700, color: 'var(--antique-gold)', marginLeft: '4px' }}>{c.num}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Telemetry & Secondary Links */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            paddingTop: '16px', borderTop: '1px solid rgba(244, 241, 234, 0.08)',
+            marginTop: 'auto'
+          }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--antique-gold)' }}>
+              ⚡ 1 XAN = 1,000 CR
+            </div>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => { logout(); setMobileOpen(false); }}
+                style={{
+                  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem',
+                  color: 'var(--red-hi)', cursor: 'pointer',
+                  padding: '10px 14px', minHeight: '44px',
+                  display: 'inline-flex', alignItems: 'center'
+                }}
+              >
+                Disconnect Session
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem',
+                  color: 'var(--neon-magenta)', textDecoration: 'underline',
+                  padding: '10px 14px', minHeight: '44px',
+                  display: 'inline-flex', alignItems: 'center'
+                }}
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       )}
 
       <style>{`
-        @media (max-width: 640px) {
-          #navbar-mobile-toggle { display: flex !important; }
-          .navbar-links, .navbar-cta-area > a:not(#navbar-mobile-toggle) { display: none !important; }
+        .navbar-desktop-only {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        }
+        .navbar-mobile-bar {
+          display: none;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+          .navbar-desktop-only { display: none !important; }
+          .navbar-mobile-bar { display: flex !important; }
+          .navbar-pill { padding: 8px 14px !important; }
         }
       `}</style>
     </>

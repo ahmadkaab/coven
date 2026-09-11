@@ -8,7 +8,8 @@ import {
 } from '@phosphor-icons/react';
 import { useArtwork, useBidHistory, usePlaceBid, queryKeys } from '../hooks/useData';
 import { subscribeToAuction } from '../services/artworkService';
-import { subscribeToBids } from '../services/bidService';
+import { subscribeToBids, placeBid as placeBidService } from '../services/bidService';
+import { getWallet, convertCreditsToXanax } from '../services/walletService';
 import { addToWatchlist, removeFromWatchlist, isWatchlisted } from '../services/watchlistService';
 import { getUserTransactions, type ExtendedTransaction } from '../services/transactionService';
 import { useAuth } from '../hooks/useAuth';
@@ -31,7 +32,7 @@ function DetailSkeleton() {
   return (
     <main className="page-content">
       <div className="container" style={{ paddingTop: 'var(--sp-8)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '1px', background: 'var(--seam)' }}>
+        <div className="artwork-detail-layout">
           <div className="skeleton" style={{ aspectRatio: '4/3' }} />
           <div style={{ background: 'var(--plate)', padding: 'var(--sp-8)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
             <div className="skeleton" style={{ height: 40, width: '80%' }} />
@@ -80,35 +81,56 @@ function BuyPanel({
 }) {
   const [bidAmount, setBidAmount] = useState('');
   const [bidError, setBidError]   = useState('');
+  const [submittingBid, setSubmittingBid] = useState(false);
   const [showPurchase, setShowPurchase] = useState(false);
-  const { mutate: placeBid, isPending } = usePlaceBid();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const tornId = userId || '4295891';
+  const wallet = userId ? getWallet(userId, tornId) : null;
 
   const isAuction   = artwork.listing_type === 'auction';
   const isAvailable = artwork.status === 'available';
   const isReserved  = artwork.status === 'reserved';
   const isSold      = artwork.status === 'sold';
-  const minBid      = (artwork.current_bid ?? 0) + 1000;
+  const isBlind     = !!artwork.is_blind && !artwork.revealed;
 
-  const handleBid = () => {
+  const currentCr   = artwork.current_bid_cr || (artwork.price_cr ?? (artwork.current_bid ? Math.round(artwork.current_bid / 835) : 1000));
+  const minBidCr    = artwork.current_bid_cr ? artwork.current_bid_cr + 100 : currentCr;
+
+  const handleBid = async () => {
     const amount = parseInt(bidAmount.replace(/\D/g, ''), 10);
     if (!userId) { navigate('/login'); return; }
-    if (!amount || amount < minBid) {
-      setBidError(`Min bid: ${formatTornCash(minBid)}`);
+    if (!amount || amount < minBidCr) {
+      setBidError(`Min bid: ${minBidCr.toLocaleString()} CR (${convertCreditsToXanax(minBidCr)} XAN)`);
       return;
     }
+
+    if (wallet && wallet.balance_cr < amount) {
+      setBidError(`Insufficient Escrow Credits (${wallet.balance_cr.toLocaleString()} CR available). Deposit Xanax in Treasury to bid.`);
+      return;
+    }
+
     setBidError('');
-    placeBid({ artworkId: artwork.id, bidderId: userId, amount }, {
-      onSuccess: () => {
-        toast.success('Bid Placed!', `Your bid of ${formatTornCash(amount)} was recorded.`);
-        setBidAmount('');
-      },
-      onError: (e: any) => {
-        setBidError(e.message);
-        toast.error('Bid Failed', e.message);
-      },
-    });
+    setSubmittingBid(true);
+    try {
+      await placeBidService({
+        artworkId: artwork.id,
+        bidderId: userId,
+        bidderTornId: tornId,
+        bidderUsername: 'Collector',
+        amountCr: amount,
+        isBlind: artwork.is_blind,
+        artworkTitle: artwork.title,
+      });
+      toast.success('Escrow Bid Placed!', `Locked ${amount.toLocaleString()} CR in Escrow for your bid.`);
+      setBidAmount('');
+    } catch (e: any) {
+      setBidError(e.message);
+      toast.error('Bid Failed', e.message);
+    } finally {
+      setSubmittingBid(false);
+    }
   };
 
   if (isSold) {
@@ -127,7 +149,7 @@ function BuyPanel({
           RESERVED / PENDING
         </div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--ghost)', marginTop: '8px' }}>
-          This artwork is currently reserved pending Torn cash verification
+          This artwork is currently reserved pending settlement
         </div>
       </div>
     );
@@ -138,31 +160,49 @@ function BuyPanel({
       {/* Price / bid header */}
       <div style={{ padding: 'var(--sp-5) var(--sp-6)', borderBottom: '1px solid var(--seam)', background: 'var(--pit)' }}>
         {isAuction ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--seam)' }}>
-            <div style={{ background: 'var(--pit)', padding: 'var(--sp-4)' }}>
-              <div className="artwork-price-label">Current Bid</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--phosphor)' }}>
-                {artwork.current_bid ? formatTornCash(artwork.current_bid) : 'No bids'}
+          <div>
+            {isBlind && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '5px',
+                fontSize: '0.5625rem', fontFamily: 'var(--font-mono)',
+                color: 'var(--crimson)', background: 'rgba(230,25,25,0.1)',
+                border: '1px solid rgba(230,25,25,0.3)', padding: '2px 6px',
+                borderRadius: '2px', marginBottom: '8px', letterSpacing: '0.08em'
+              }}>
+                ● SEALED BLIND AUCTION
               </div>
-            </div>
-            <div style={{ background: 'var(--pit)', padding: 'var(--sp-4)' }}>
-              <div className="artwork-price-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Clock size={10} weight="bold" />Ends in
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--seam)' }}>
+              <div style={{ background: 'var(--pit)', padding: 'var(--sp-4)' }}>
+                <div className="artwork-price-label">Current Bid</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)', lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--phosphor)' }}>
+                  {currentCr.toLocaleString()} <span style={{ fontSize: '0.875rem', color: 'var(--crimson)', fontFamily: 'var(--font-mono)' }}>CR</span>
+                </div>
+                <div style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)', marginTop: '4px' }}>
+                  ≈ {convertCreditsToXanax(currentCr)} Xanax (5% platform fee)
+                </div>
               </div>
-              {artwork.auction_end_time ? (
-                <Countdown endTime={artwork.auction_end_time} />
-              ) : (
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ghost)', fontSize: '0.875rem' }}>—</span>
-              )}
+              <div style={{ background: 'var(--pit)', padding: 'var(--sp-4)' }}>
+                <div className="artwork-price-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Clock size={10} weight="bold" />Ends in
+                </div>
+                {artwork.auction_end_time ? (
+                  <Countdown endTime={artwork.auction_end_time} />
+                ) : (
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ghost)', fontSize: '0.875rem' }}>—</span>
+                )}
+              </div>
             </div>
           </div>
         ) : (
           <div style={{ padding: 'var(--sp-4)' }}>
             <div className="artwork-price-label">Fixed Price</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--phosphor)' }}>
-              {artwork.price_torn ? formatTornCash(artwork.price_torn) : 'Contact Artist'}
+              {artwork.price_cr ? `${artwork.price_cr.toLocaleString()} CR` : artwork.price_torn ? formatTornCash(artwork.price_torn) : 'Contact Artist'}
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)', marginTop: '4px' }}>TORN CASH</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', color: 'var(--shadow-type)', marginTop: '4px' }}>
+              {artwork.price_cr ? `≈ ${convertCreditsToXanax(artwork.price_cr)} XANAX STANDARD` : 'TORN CASH'}
+            </div>
           </div>
         )}
       </div>
@@ -171,12 +211,21 @@ function BuyPanel({
       <div style={{ padding: 'var(--sp-6)' }}>
         {isAuction && isAvailable && (
           <div style={{ marginBottom: 'var(--sp-4)' }}>
-            <label htmlFor="bid-input" className="form-label">Your Bid (min {formatTornCash(minBid)})</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <label htmlFor="bid-input" className="form-label" style={{ margin: 0 }}>
+                Your Bid in CR (min {minBidCr.toLocaleString()} CR)
+              </label>
+              {wallet && (
+                <span style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)' }}>
+                  Balance: {wallet.balance_cr.toLocaleString()} CR
+                </span>
+              )}
+            </div>
             <input
               id="bid-input"
               type="text"
               className="form-input"
-              placeholder={`${minBid.toLocaleString()}`}
+              placeholder={`${minBidCr.toLocaleString()}`}
               value={bidAmount}
               onChange={(e) => { setBidAmount(e.target.value); setBidError(''); }}
             />
@@ -185,13 +234,24 @@ function BuyPanel({
                 ✗ {bidError}
               </div>
             )}
+            {wallet && wallet.balance_cr < minBidCr && (
+              <div style={{ marginTop: '8px' }}>
+                <Link
+                  to="/wallet"
+                  className="btn btn-sm btn-industrial"
+                  style={{ width: '100%', fontSize: '0.625rem', padding: '6px', justifyContent: 'center' }}
+                >
+                  ⚡ Deposit Xanax in Escrow Treasury
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
         {isAvailable && (
           <button
-            className="btn btn-primary"
-            style={{ width: '100%', justifyContent: 'center', borderRadius: 0, padding: 'var(--sp-4)' }}
+            className="renaissance-btn-primary"
+            style={{ width: '100%', justifyContent: 'center', borderRadius: '6px', padding: '14px', fontSize: '0.8125rem' }}
             onClick={() => {
               if (isAuction) {
                 handleBid();
@@ -200,12 +260,12 @@ function BuyPanel({
                 setShowPurchase(true);
               }
             }}
-            disabled={isPending}
+            disabled={submittingBid}
           >
-            {isPending ? 'SUBMITTING...' : isAuction ? (
-              <><Lightning size={14} weight="fill" />PLACE BID</>
+            {submittingBid ? 'LOCKING ESCROW...' : isAuction ? (
+              <><Lightning size={16} weight="fill" />PLACE ESCROW BID ({currentCr.toLocaleString()} CR &bull; {currentCr / 1000} XAN)</>
             ) : (
-              artwork.price_torn ? `BUY NOW — ${formatTornCash(artwork.price_torn)}` : 'BUY NOW — TORN CASH'
+              artwork.price_cr ? `BUY NOW — ${artwork.price_cr.toLocaleString()} CR (${(artwork.price_cr / 1000).toLocaleString()} XAN)` : artwork.price_torn ? `BUY NOW — ${formatTornCash(artwork.price_torn)}` : 'BUY NOW'
             )}
           </button>
         )}
@@ -232,7 +292,7 @@ function BuyPanel({
             title="Open direct encrypted inquiry with the artist on The Wire"
           >
             <Chats size={14} weight="bold" color="var(--term-green)" />
-            INQUIRE ARTIST ON THE WIRE
+            MESSAGE ARTIST
           </button>
         )}
 
@@ -253,10 +313,10 @@ function BuyPanel({
           onClick={() => {
             navigate('/trade');
           }}
-          title="Propose a peer-to-peer artwork or cash trade swap"
+          title="Propose an artwork or credit trade"
         >
           <ArrowsLeftRight size={14} weight="bold" color="var(--red)" />
-          PROPOSE P2P TRADE SWAP
+          PROPOSE TRADE SWAP
         </button>
 
         {/* Torn verification note */}
@@ -402,23 +462,27 @@ export function ArtworkDetail() {
 
   return (
     <main className="page-content" style={{ paddingBottom: 'var(--sp-20)' }}>
-      <div className="container" style={{ paddingTop: 'var(--sp-6)' }}>
-        {/* Breadcrumb */}
-        <Link
-          to="/browse"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            fontFamily: 'var(--font-mono)', fontSize: '0.6875rem',
-            color: 'var(--ghost)', letterSpacing: '0.1em', textTransform: 'uppercase',
-            marginBottom: 'var(--sp-6)',
-          }}
-        >
-          <ArrowLeft size={10} weight="bold" /> Browse
-        </Link>
+      <div className="container" style={{ paddingTop: 'var(--sp-8)' }}>
+        {/* Renaissance Rubric Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-6)', flexWrap: 'wrap', gap: '12px' }}>
+          <Link
+            to="/browse"
+            className="renaissance-btn-gold"
+            style={{
+              fontSize: '0.6875rem', padding: '6px 14px', gap: '6px'
+            }}
+          >
+            <ArrowLeft size={12} weight="bold" /> Return to Marketplace
+          </Link>
+          <div className="renaissance-chapter-tag" style={{ margin: 0 }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--neon-magenta)', display: 'inline-block', boxShadow: '0 0 8px var(--neon-magenta)' }} />
+            ARTWORK DETAILS &bull; VERIFIED PROVENANCE
+          </div>
+        </div>
 
         {/* Main grid: image | sidebar */}
         <motion.div
-          style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '1px', background: 'var(--seam)', alignItems: 'start' }}
+          className="artwork-detail-layout"
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
@@ -593,7 +657,7 @@ export function ArtworkDetail() {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--shadow-type)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 'var(--sp-4)' }}>
                 [ ARTWORK DETAILS ]
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--seam)' }}>
+              <div className="grid-responsive-4" style={{ gap: '1px', background: 'var(--seam)' }}>
                 {[
                   { label: 'Listing',  value: merged.listing_type?.toUpperCase() },
                   { label: 'Views',    value: (merged.view_count ?? 0).toLocaleString() },
@@ -626,7 +690,9 @@ export function ArtworkDetail() {
                     <BidRow
                       key={bid.id}
                       amount={bid.amount}
-                      username={(bid.bidder as any)?.username ?? 'Anonymous'}
+                      username={merged.is_blind && !merged.revealed
+                        ? (bid.blind_alias || `Collector #${i + 1}`)
+                        : ((bid.bidder as any)?.username ?? 'Anonymous')}
                       time={bid.created_at}
                       isTop={i === 0}
                     />
@@ -637,41 +703,72 @@ export function ArtworkDetail() {
           </div>
 
           {/* RIGHT — sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', position: 'sticky', top: 80 }}>
+          <div className="artwork-detail-sidebar">
             {/* Title + artist */}
             <div style={{ background: 'var(--plate)', padding: 'var(--sp-6)' }}>
               <h1 style={{
-                fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-                lineHeight: 0.95, letterSpacing: '-0.04em', textTransform: 'uppercase',
-                color: 'var(--phosphor)', marginBottom: 'var(--sp-5)',
+                fontFamily: 'var(--font-cinzel)', fontSize: 'clamp(1.5rem, 3vw, 2.4rem)',
+                lineHeight: 1.1, letterSpacing: '0.02em',
+                color: 'var(--phosphor)', marginBottom: 'var(--sp-4)',
               }}>
                 {merged.title}
               </h1>
 
-              {merged.artist && (
-                <Link
-                  to={`/artist/${merged.artist.id}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', textDecoration: 'none' }}
-                >
-                  {merged.artist.avatar_url ? (
-                    <img src={merged.artist.avatar_url} alt={merged.artist.username} style={{ width: 40, height: 40, objectFit: 'cover', flexShrink: 0 }} />
-                  ) : (
-                    <div className="artist-avatar-placeholder" style={{ width: 40, height: 40, fontSize: '0.875rem' }}>
-                      {merged.artist.username.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '-0.02em', textTransform: 'uppercase', color: 'var(--phosphor)' }}>
-                      {merged.artist.username}
-                    </div>
-                    <StarRating rating={merged.artist.average_rating ?? 0} count={merged.artist.total_reviews ?? 0} size={10} />
+              {merged.is_blind && !merged.revealed ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 'var(--sp-3)',
+                  padding: '12px 14px', background: 'rgba(230, 25, 25, 0.05)',
+                  border: '1px dashed rgba(230, 25, 25, 0.35)', borderRadius: '3px'
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '3px', background: 'var(--void)',
+                    border: '1px solid var(--crimson)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--crimson)', fontWeight: 700
+                  }}>
+                    ?
                   </div>
-                  {merged.artist.tier && (
-                    <span className={`badge badge-${merged.artist.tier}`} style={{ marginLeft: 'auto' }}>
-                      {merged.artist.tier.toUpperCase()}
-                    </span>
-                  )}
-                </Link>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', letterSpacing: '-0.02em', textTransform: 'uppercase', color: 'var(--crimson)' }}>
+                      {merged.blind_cipher || 'Masked Artisan'}
+                    </div>
+                    <div style={{ fontSize: '0.625rem', fontFamily: 'var(--font-mono)', color: 'var(--ghost)' }}>
+                      SEALED BLIND ARTIST · ZERO BIAS
+                    </div>
+                  </div>
+                  <span style={{
+                    marginLeft: 'auto', fontSize: '0.5625rem', fontFamily: 'var(--font-mono)',
+                    background: 'rgba(230, 25, 25, 0.15)', color: 'var(--crimson)', border: '1px solid rgba(230, 25, 25, 0.35)',
+                    padding: '2px 6px', borderRadius: '2px', letterSpacing: '0.06em'
+                  }}>
+                    MASKED
+                  </span>
+                </div>
+              ) : (
+                merged.artist && (
+                  <Link
+                    to={`/artist/${merged.artist.id}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', textDecoration: 'none' }}
+                  >
+                    {merged.artist.avatar_url ? (
+                      <img src={merged.artist.avatar_url} alt={merged.artist.username} style={{ width: 40, height: 40, objectFit: 'cover', flexShrink: 0 }} />
+                    ) : (
+                      <div className="artist-avatar-placeholder" style={{ width: 40, height: 40, fontSize: '0.875rem' }}>
+                        {merged.artist.username.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '-0.02em', textTransform: 'uppercase', color: 'var(--phosphor)' }}>
+                        {merged.artist.username}
+                      </div>
+                      <StarRating rating={merged.artist.average_rating ?? 0} count={merged.artist.total_reviews ?? 0} size={10} />
+                    </div>
+                    {merged.artist.tier && (
+                      <span className={`badge badge-${merged.artist.tier}`} style={{ marginLeft: 'auto' }}>
+                        {merged.artist.tier.toUpperCase()}
+                      </span>
+                    )}
+                  </Link>
+                )
               )}
             </div>
 
@@ -695,11 +792,11 @@ export function ArtworkDetail() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}>
-                <span>[ VAULT & PROVENANCE RECORD ]</span>
+                <span>[ VAULT ACCESS &amp; PROVENANCE ]</span>
                 {clearance.hasAccess ? (
                   <span style={{ color: 'var(--term-green)', fontWeight: 'bold' }}>● UNLOCKED</span>
                 ) : (
-                  <span style={{ color: 'var(--red-hi)' }}>○ PROTECTED</span>
+                  <span style={{ color: 'var(--red-hi)' }}>○ LOCKED (BUY TO UNLOCK)</span>
                 )}
               </div>
 
@@ -724,7 +821,7 @@ export function ArtworkDetail() {
                       color: clearance.hasAccess ? 'var(--term-green)' : 'var(--phosphor)',
                       fontWeight: 600,
                     }}>
-                      {clearance.hasAccess ? 'VAULT CLEARANCE GRANTED' : 'MASTER PAYLOAD SEALED'}
+                      {clearance.hasAccess ? 'VAULT ACCESS UNLOCKED' : 'ORIGINAL HIGH-RES LOCKED'}
                     </span>
                   </div>
 
@@ -755,7 +852,7 @@ export function ArtworkDetail() {
                 }}>
                   {clearance.hasAccess
                     ? 'Full resolution master asset unwatermarked. Ready for forum BBCode export and download.'
-                    : 'Unwatermarked original resolution asset is encrypted in the COVEN vault until purchase.'}
+                    : 'Unwatermarked original resolution asset is protected in the COVEN vault until purchased.'}
                 </div>
 
                 {clearance.hasAccess && (
@@ -765,7 +862,7 @@ export function ArtworkDetail() {
                     className="btn btn-primary btn-sm"
                     style={{ width: '100%', justifyContent: 'center', gap: '6px', borderRadius: 0 }}
                   >
-                    <DownloadSimple size={13} weight="bold" /> ACCESS VAULT MASTER
+                    <DownloadSimple size={13} weight="bold" /> DOWNLOAD MASTER ARTWORK
                   </button>
                 )}
               </div>
@@ -802,7 +899,7 @@ export function ArtworkDetail() {
                     className="btn btn-industrial btn-sm"
                     style={{ width: '100%', justifyContent: 'center', gap: '6px', borderRadius: 0 }}
                   >
-                    <Certificate size={13} color="var(--term-green)" /> VIEW CERTIFICATE & BADGE
+                    <Certificate size={13} color="var(--term-green)" /> VIEW CERTIFICATE OF AUTHENTICITY
                   </button>
                 </div>
               )}

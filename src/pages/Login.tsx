@@ -57,10 +57,20 @@ export function Login() {
         COVEN
       </div>
 
-      <div className="login-card" style={{ zIndex: 2, maxWidth: '480px', margin: 'var(--sp-6)' }}>
+      <div className="renaissance-glass-panel" style={{ zIndex: 2, maxWidth: '480px', margin: 'var(--sp-6)', padding: '36px 32px' }}>
         {/* Brand */}
-        <div className="login-brand">COVEN</div>
-        <div className="login-sub">[ ACCESS TERMINAL // TORN CITY ]</div>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div className="renaissance-chapter-tag" style={{ justifyContent: 'center', marginBottom: '6px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--neon-magenta)', display: 'inline-block', boxShadow: '0 0 8px var(--neon-magenta)' }} />
+            SOVEREIGN ACCESS GATE &bull; WINTER 2026
+          </div>
+          <h1 className="renaissance-title" style={{ fontSize: '2.8rem', margin: '0 0 4px 0' }}>
+            COVEN
+          </h1>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ghost)', letterSpacing: '0.12em' }}>
+            [ DIRECT TORN ESCROW TERMINAL ]
+          </div>
+        </div>
 
         {/* Error */}
         {error && (
@@ -69,14 +79,12 @@ export function Login() {
           </div>
         )}
 
-
-
         {/* ── GET CUSTOM TORN API KEY HELPER CARD ─────────────── */}
         <div style={{
-          background: 'linear-gradient(135deg, rgba(230, 25, 25, 0.08) 0%, rgba(20, 20, 26, 0.6) 100%)',
-          border: '1px solid rgba(230, 25, 25, 0.25)',
-          borderRadius: 'var(--r-sm)',
-          padding: '14px',
+          background: 'rgba(10, 13, 12, 0.75)',
+          border: '1px solid rgba(212, 175, 55, 0.3)',
+          borderRadius: '8px',
+          padding: '16px',
           marginBottom: 'var(--sp-5)',
           display: 'flex',
           flexDirection: 'column',
@@ -88,8 +96,8 @@ export function Login() {
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.6875rem',
                 fontWeight: 700,
-                color: 'var(--chalk)',
-                letterSpacing: '0.05em',
+                color: 'var(--antique-gold)',
+                letterSpacing: '0.08em',
               }}>
                 NEED A SECURE CUSTOM TORN KEY?
               </div>
@@ -107,49 +115,30 @@ export function Login() {
               href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=COVEN&user=basic,profile,log"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-sm"
+              className="renaissance-btn-gold"
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'rgba(230, 25, 25, 0.15)',
-                color: 'var(--red-hi)',
-                border: '1px solid rgba(230, 25, 25, 0.4)',
-                borderRadius: 'var(--r-sm)',
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-                fontSize: '0.6875rem',
-                fontWeight: 600,
-                fontFamily: 'var(--font-mono)',
+                fontSize: '0.625rem',
                 padding: '6px 12px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--red)';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(230, 25, 25, 0.15)';
-                e.currentTarget.style.color = 'var(--red-hi)';
+                gap: '4px',
               }}
             >
-              GET CUSTOM KEY <ArrowSquareOut size={13} weight="bold" />
+              GET KEY <ArrowSquareOut size={12} weight="bold" />
             </a>
           </div>
           <div style={{
             fontFamily: 'var(--font-mono)',
             fontSize: '0.5625rem',
-            color: 'var(--shadow-type)',
+            color: 'var(--ghost)',
             display: 'flex',
             alignItems: 'flex-start',
             gap: '8px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+            borderTop: '1px solid rgba(244, 241, 234, 0.06)',
             paddingTop: '8px',
             lineHeight: 1.4,
           }}>
-            <ShieldCheck size={14} color="var(--term-green)" weight="bold" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <ShieldCheck size={14} color="var(--antique-gold)" weight="bold" style={{ flexShrink: 0, marginTop: '1px' }} />
             <span>
-              Grants <strong style={{ color: 'var(--chalk)' }}>user=basic,profile,log</strong> — enables Log #4810 payment tracking while keeping battle stats & inventory 100% private.
+              Grants <strong style={{ color: 'var(--phosphor)' }}>user=basic,profile,log</strong> — enables Log #4810 payment tracking while keeping battle stats & inventory 100% private.
             </span>
           </div>
         </div>
@@ -158,7 +147,7 @@ export function Login() {
         <div style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '0.5625rem',
-          color: 'var(--shadow-type)',
+          color: 'var(--ghost)',
           letterSpacing: '0.15em',
           textTransform: 'uppercase',
           marginBottom: 'var(--sp-3)',
@@ -170,17 +159,17 @@ export function Login() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <label htmlFor="api-key" className="form-label" style={{ margin: 0 }}>
+                <label htmlFor="api-key" className="form-label" style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.6875rem' }}>
                   Torn API Key
                 </label>
                 <button
                   type="button"
                   onClick={handlePasteClipboard}
                   style={{
-                    background: pasted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                    border: `1px solid ${pasted ? 'var(--term-green)' : 'rgba(255, 255, 255, 0.12)'}`,
-                    borderRadius: 'var(--r-sm)',
-                    color: pasted ? 'var(--term-green)' : 'var(--chalk)',
+                    background: pasted ? 'rgba(255, 0, 127, 0.15)' : 'rgba(244, 241, 234, 0.05)',
+                    border: `1px solid ${pasted ? 'var(--neon-magenta)' : 'rgba(244, 241, 234, 0.12)'}`,
+                    borderRadius: '4px',
+                    color: pasted ? 'var(--neon-magenta)' : 'var(--phosphor)',
                     fontFamily: 'var(--font-mono)',
                     fontSize: '0.5625rem',
                     padding: '3px 8px',
@@ -205,7 +194,14 @@ export function Login() {
                 onChange={(e) => setApiKey(e.target.value)}
                 required
                 autoComplete="current-password"
-                style={{ fontFamily: 'var(--font-mono)', letterSpacing: apiKey ? '0.1em' : 'normal' }}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: apiKey ? '0.1em' : 'normal',
+                  background: 'rgba(10, 13, 12, 0.75)',
+                  border: '1px solid rgba(244, 241, 234, 0.12)',
+                  borderRadius: '6px',
+                  padding: '12px 14px'
+                }}
               />
               <div style={{
                 fontFamily: 'var(--font-mono)',
@@ -221,14 +217,14 @@ export function Login() {
 
           <button
             type="submit"
-            className="btn btn-primary btn-lg"
+            className="renaissance-btn-primary"
             disabled={loading || !apiKey.trim()}
             style={{
               width: '100%',
               justifyContent: 'center',
-              marginTop: 'var(--sp-4)',
-              padding: '12px 24px',
-              boxShadow: (!loading && apiKey.trim()) ? '0 0 20px rgba(230, 25, 25, 0.4)' : 'none',
+              marginTop: 'var(--sp-5)',
+              padding: '14px 24px',
+              fontSize: '0.8125rem'
             }}
           >
             {loading ? 'AUTHENTICATING WITH TORN...' : 'AUTHENTICATE & ENTER COVEN'}

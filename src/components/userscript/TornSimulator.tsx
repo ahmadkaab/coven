@@ -32,7 +32,7 @@ export function TornSimulator() {
   const [cashMessage, setCashMessage] = useState<string>('');
 
   const handleAutoFill = () => {
-    setCashPlayerId('4427813');
+    setCashPlayerId('4295891');
     setCashAmount('5,000,000');
     setCashMessage('COVEN: NEON SYNDICATE PROTOCOL - Log #4810-7782');
     setAutofilled(true);
@@ -102,7 +102,7 @@ export function TornSimulator() {
             <span style={{ color: '#10B981' }}>🔒</span>
             <span style={{ color: '#fff' }}>https://www.torn.com</span>
             <span style={{ color: '#666' }}>
-              {activeTab === 'profile' && '/profiles.php?XID=4427813'}
+              {activeTab === 'profile' && '/profiles.php?XID=4295891'}
               {activeTab === 'forum' && '/forums.php#!p=forums&f=23&b=0&a=899214'}
               {activeTab === 'sendcash' && '/sendcash.php'}
             </span>
@@ -272,7 +272,7 @@ export function TornSimulator() {
                 >
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80"
-                    alt="bell_queen"
+                    alt="ahmad_kaab"
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                   {/* Status dot */}
@@ -303,7 +303,7 @@ export function TornSimulator() {
                         letterSpacing: '-0.02em',
                       }}
                     >
-                      bell_queen
+                      ahmad_kaab
                     </h2>
                     <span
                       style={{
@@ -315,7 +315,7 @@ export function TornSimulator() {
                         borderRadius: '4px',
                       }}
                     >
-                      [4427813]
+                      [4295891]
                     </span>
                   </div>
 
@@ -520,11 +520,11 @@ export function TornSimulator() {
                       }}
                     >
                       <Sparkle size={12} weight="fill" />
-                      Commission bell_queen
+                      Commission ahmad_kaab
                     </a>
 
                     <a
-                      href="/artists/bell_queen"
+                      href="/artists/ahmad_kaab"
                       target="_blank"
                       rel="noreferrer"
                       style={{
@@ -622,13 +622,13 @@ export function TornSimulator() {
                 >
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80"
-                    alt="bell_queen"
+                    alt="ahmad_kaab"
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 </div>
                 <div>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#f3f4f6', fontWeight: 600 }}>
-                    bell_queen
+                    ahmad_kaab
                   </span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#6b7280', marginLeft: '8px' }}>
                     14 minutes ago
@@ -940,7 +940,7 @@ export function TornSimulator() {
                         color: 'var(--ghost)',
                       }}
                     >
-                      Target: <strong style={{ color: '#fff' }}>bell_queen [4427813]</strong> • Amount: <strong style={{ color: '#10B981' }}>$5,000,000</strong> • Ref: <strong style={{ color: '#818CF8' }}>Log #4810-7782</strong>
+                      Target: <strong style={{ color: '#fff' }}>ahmad_kaab [4295891]</strong> • Amount: <strong style={{ color: '#10B981' }}>$5,000,000</strong> • Ref: <strong style={{ color: '#818CF8' }}>Log #4810-7782</strong>
                     </p>
                   </div>
 
@@ -1014,7 +1014,7 @@ export function TornSimulator() {
                     type="text"
                     value={cashPlayerId}
                     onChange={(e) => setCashPlayerId(e.target.value)}
-                    placeholder="Enter Player ID e.g. 4427813"
+                    placeholder="Enter Player ID e.g. 4295891"
                     style={{
                       width: '100%',
                       background: '#12141a',
@@ -1030,7 +1030,7 @@ export function TornSimulator() {
                   />
                   {autofilled && (
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: '#10B981', marginTop: '4px', display: 'inline-block' }}>
-                      ✓ Verified: bell_queen (Monarch Syndicate Artist)
+                      ✓ Verified: ahmad_kaab (Platform Sovereign & Master Artist)
                     </span>
                   )}
                 </div>

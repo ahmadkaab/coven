@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams, useLocation, Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { MagnifyingGlass, SlidersHorizontal, X, Broadcast } from '@phosphor-icons/react';
 import { ArtworkCard } from '../components/artwork/ArtworkCard';
@@ -111,43 +111,29 @@ export function Browse() {
   return (
     <main className="page-content" style={{ paddingBottom: 'var(--sp-20)' }}>
 
-      {/* ── HEADER ─────────────────────────────────────────── */}
-      <div style={{ borderBottom: '2px solid var(--red)', background: 'var(--pit)', paddingTop: '24px' }}>
+      {/* ── RENAISSANCE HEADER ─────────────────────────────────────────── */}
+      <div className="renaissance-page-header">
         <div className="container">
-          <div style={{ padding: 'var(--sp-6) 0 var(--sp-2)' }}>
-            <div style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.5625rem',
-              color: 'var(--shadow-type)', letterSpacing: '0.2em',
-              textTransform: 'uppercase', marginBottom: 'var(--sp-2)',
-            }}>
-              [ MARKET — {isLoading ? '—' : total} LISTINGS ]
+          <div>
+            <div className="renaissance-chapter-tag">
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--neon-magenta)', display: 'inline-block', boxShadow: '0 0 8px var(--neon-magenta)' }} />
+              MARKETPLACE &bull; {isLoading ? 'LOADING ARTWORKS...' : `${total} ARTWORKS AVAILABLE`}
             </div>
-            <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2.5rem, 6vw, 6rem)',
-              lineHeight: 0.9, letterSpacing: '-0.04em',
-              textTransform: 'uppercase', color: 'var(--phosphor)',
-              marginBottom: 'var(--sp-4)',
-            }}>
-              BROWSE ART
+            <h1 className="renaissance-title">
+              Marketplace
             </h1>
+            <p className="renaissance-subtitle">
+              Explore unique digital art, custom forum signatures, and faction banners. Instant purchases and mystery blind auctions backed by safe Xanax escrow (1 Xanax = 1,000 Credits).
+            </p>
           </div>
 
           {/* Type tabs */}
-          <div style={{ display: 'flex', gap: '1px', background: 'var(--seam)' }}>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '24px', marginBottom: '16px' }}>
             {TYPE_TABS.map((t) => (
               <button
                 key={t.label}
                 onClick={() => setActiveType(t.value)}
-                style={{
-                  padding: 'var(--sp-3) var(--sp-5)',
-                  fontFamily: 'var(--font-mono)', fontSize: '0.625rem',
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  background: activeType === t.value ? 'var(--void)' : 'var(--plate)',
-                  color: activeType === t.value ? 'var(--phosphor)' : 'var(--ghost)',
-                  borderBottom: activeType === t.value ? '2px solid var(--red)' : '2px solid transparent',
-                  cursor: 'pointer',
-                }}
+                className={`renaissance-pill${activeType === t.value ? ' active' : ''}`}
               >
                 {t.label}
               </button>
@@ -155,17 +141,38 @@ export function Browse() {
           </div>
 
           {/* Search + filter row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1px', background: 'var(--seam)', marginTop: '1px' }}>
-            <div className="search-wrap" style={{ background: 'var(--void)', display: 'flex', alignItems: 'center' }}>
-              <span className="search-icon"><MagnifyingGlass size={16} weight="bold" /></span>
+          <div style={{
+            display: 'flex', gap: '12px', flexWrap: 'wrap',
+            alignItems: 'center', marginBottom: '16px'
+          }}>
+            <div className="renaissance-glass-panel" style={{
+              display: 'flex', alignItems: 'center',
+              padding: '0 16px',
+              borderRadius: '8px',
+              flex: '1 1 240px',
+              minHeight: '44px'
+            }}>
+              <span style={{ color: 'var(--antique-gold)', display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+                <MagnifyingGlass size={16} weight="bold" />
+              </span>
               <input
                 className="search-input"
                 type="text"
-                placeholder="SEARCH ARTWORKS..."
+                placeholder="Search by title, artist, or tags..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 id="browse-search"
-                style={{ flex: 1 }}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '12px 0',
+                  color: 'var(--phosphor)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.875rem',
+                  outline: 'none',
+                  minWidth: 0
+                }}
               />
               {search && (
                 <button
@@ -176,7 +183,7 @@ export function Browse() {
                     border: 'none',
                     color: 'var(--ghost)',
                     cursor: 'pointer',
-                    padding: '0 var(--sp-3)',
+                    padding: '0 8px',
                     display: 'flex',
                     alignItems: 'center',
                   }}
@@ -187,49 +194,69 @@ export function Browse() {
               )}
             </div>
             <button
-              className="btn btn-industrial"
-              style={{ padding: '0 var(--sp-6)', gap: '8px', borderRadius: 0 }}
+              className="btn btn-ghost"
+              style={{
+                padding: '10px 18px', gap: '8px', borderRadius: '8px',
+                border: '1px solid rgba(244, 241, 234, 0.08)',
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                color: showFilters ? 'var(--neon-magenta)' : 'var(--phosphor)',
+                background: showFilters ? 'rgba(255, 0, 127, 0.08)' : 'rgba(244, 241, 234, 0.02)',
+                minHeight: '44px'
+              }}
               onClick={() => setShowFilters(!showFilters)}
             >
-              <SlidersHorizontal size={13} weight="bold" />FILTER
+              <SlidersHorizontal size={14} weight="bold" />
+              Filter
             </button>
           </div>
 
           {/* Tag chips + sort */}
-          <div style={{ padding: 'var(--sp-3) 0', borderTop: '1px solid var(--hull)', overflowX: 'auto' }}>
-            <div className="filter-row">
+          <div className="no-scrollbar" style={{ padding: 'var(--sp-2) 0 var(--sp-4)', borderTop: '1px solid rgba(244, 241, 234, 0.06)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <div className="filter-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {FILTERS.map((f) => (
                 <button
                   key={f}
-                  className={`chip${activeFilter === f ? ' active' : ''}`}
+                  className={`renaissance-pill${activeFilter === f ? ' active' : ''}`}
                   onClick={() => setActiveFilter(f)}
+                  style={{ padding: '6px 14px', whiteSpace: 'nowrap', minHeight: '36px' }}
                 >
                   {f}
                 </button>
               ))}
               <button
                 type="button"
-                className={`chip${radarOnly ? ' active' : ''}`}
+                className={`renaissance-pill${radarOnly ? ' active' : ''}`}
                 onClick={() => setRadarOnly(!radarOnly)}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  borderColor: radarOnly ? 'var(--term-green)' : undefined,
-                  color: radarOnly ? 'var(--term-green)' : undefined,
-                  background: radarOnly ? 'rgba(0, 255, 100, 0.08)' : undefined,
+                  padding: '6px 14px',
+                  borderColor: radarOnly ? 'var(--neon-magenta)' : undefined,
+                  color: radarOnly ? 'var(--neon-magenta)' : undefined,
+                  whiteSpace: 'nowrap',
+                  minHeight: '36px'
                 }}
                 title="Filter to artworks by artists pinned to your Syndicate Radar"
               >
                 <Broadcast size={12} weight={radarOnly ? 'fill' : 'bold'} />
-                RADAR ONLY ({followedIds.length})
+                RADAR ({followedIds.length})
               </button>
-              <div style={{ marginLeft: 'auto', display: 'flex', gap: '1px', background: 'var(--seam)' }}>
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {SORT_OPTIONS.map((s) => (
                   <button
                     key={s}
                     className={`chip${activeSort === s ? ' active' : ''}`}
                     onClick={() => setActiveSort(s)}
+                    style={{
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      fontSize: '0.6875rem',
+                      fontFamily: 'var(--font-mono)',
+                      border: activeSort === s ? '1px solid var(--antique-gold)' : '1px solid transparent',
+                      background: activeSort === s ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                      color: activeSort === s ? 'var(--antique-gold)' : 'var(--ghost)',
+                      minHeight: '36px',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
                   >
                     {s}
                   </button>
@@ -269,13 +296,27 @@ export function Browse() {
             }}>
               {radarOnly ? 'NO RADAR DROPS' : (debouncedSearch || activeFilter !== 'All' ? 'NO RESULTS' : 'MARKET EMPTY')}
             </div>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--shadow-type)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--shadow-type)', maxWidth: '480px', margin: '0 auto' }}>
               {radarOnly
                 ? 'No available pieces from your pinned artists. Pin more artists to your Syndicate Radar.'
                 : (debouncedSearch || activeFilter !== 'All'
-                  ? 'Try a different search or filter'
-                  : 'Be the first to list artwork on COVEN')}
+                  ? 'Try a different search keyword or category filter above.'
+                  : 'There are no active artwork listings currently in this view.')}
             </p>
+            <div style={{ marginTop: 'var(--sp-6)', display: 'flex', justifyContent: 'center', gap: '12px' }}>
+              {user?.player_id === 4295891 ? (
+                <Link to="/list-artwork" className="btn btn-industrial">
+                  + List New Artwork
+                </Link>
+              ) : (
+                <Link to="/commissions" className="renaissance-btn-gold" style={{ textDecoration: 'none', padding: '10px 18px', fontSize: '0.75rem' }}>
+                  Commission Ahmad Directly
+                </Link>
+              )}
+              <Link to="/wallet" className="btn btn-ghost">
+                ⚡ Wallet &amp; Escrow
+              </Link>
+            </div>
           </div>
         )}
 

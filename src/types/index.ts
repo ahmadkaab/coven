@@ -51,13 +51,21 @@ export interface Artwork {
   thumbnail_url?: string;
   listing_type: ListingType;
   price_torn?: number;         // fixed price in Torn cash
+  price_cr?: number;           // price in COVEN Credits (1 Xanax = 1,000 CR)
   status: ArtworkStatus;
   tags?: string[];
   is_nsfw?: boolean;
   // auction fields
   auction_end_time?: string;
   current_bid?: number;
+  current_bid_cr?: number;     // current bid in CR
   bid_count?: number;
+  // blind auction & pinning
+  is_blind?: boolean;          // blind auction: artist & bidders masked
+  blind_cipher?: string;       // e.g. "Cipher #12"
+  revealed?: boolean;          // true when auction ends and real identity revealed
+  is_pinned?: boolean;         // featured 10 Xanax listing
+  pin_expires_at?: string;
   // meta
   view_count?: number;
   created_at: string;
@@ -71,6 +79,48 @@ export interface Bid {
   bidder_id: string;
   bidder?: Artist;
   amount: number;
+  amount_cr?: number;          // bid amount in CR
+  blind_alias?: string;        // e.g. "Collector #04"
+  created_at: string;
+}
+
+/* ── WALLET & TOKENS (1 Xanax = 1,000 CR) ──────────────────── */
+export interface Wallet {
+  user_id: string;
+  torn_id: string;
+  balance_cr: number;          // available Credits for bidding / buying
+  locked_cr: number;           // held in active blind/standard bids
+  total_deposited_xanax: number;
+  total_withdrawn_xanax: number;
+  updated_at: string;
+}
+
+export type WithdrawalStatus = 'pending' | 'claimed' | 'fulfilled' | 'cancelled';
+
+export interface WithdrawalTicket {
+  id: string;
+  user_id: string;
+  torn_id: string;
+  amount_cr: number;
+  amount_xanax: number;
+  status: WithdrawalStatus;
+  claimed_by_banker_id?: string;
+  claimed_by?: string;
+  proof_log_url?: string;
+  created_at: string;
+  fulfilled_at?: string;
+}
+
+export type WalletTxType = 'deposit' | 'withdrawal' | 'bid_hold' | 'bid_refund' | 'sale_payout' | 'pin_fee';
+
+export interface WalletTransaction {
+  id: string;
+  user_id: string;
+  torn_id: string;
+  type: WalletTxType;
+  amount_cr: number;
+  amount_xanax?: number;
+  description: string;
   created_at: string;
 }
 
